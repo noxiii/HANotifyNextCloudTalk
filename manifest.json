@@ -1,0 +1,10 @@
+{
+  "domain": "https://github.com/noxiii/HANextcloudTalk",
+  "name": "NextCloud Talk",
+  "documentation": "https://github.com/noxiii/HANextcloudTalk",
+  "requirements": [
+    "requests"
+  ],
+  "dependencies": [],
+  "codeowners": []
+}
