@@ -31,7 +31,7 @@ def get_service(hass, config, discovery_info=None):
     username = config.get(CONF_USERNAME)
     password = config.get(CONF_PASSWORD)
 
-    url = config.get(CONF_URL)+"/ocs/v2.php/apps/spreed/api/v1"
+    url = config.get(CONF_URL)
     room = config.get(CONF_ROOM)
 
     try:
@@ -61,7 +61,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         self._session.headers.update({'Accept': 'application/json'})
         
         """ Get Token/ID for Room """
-        request_rooms = self._session.get(self.url+"/room")
+        request_rooms = self._session.get(self.url+"/ocs/v2.php/apps/spreed/api/v4/room")
         room_json = request_rooms.json()
         rooms = room_json["ocs"]["data"]
         for roomInfo in rooms:
@@ -72,7 +72,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
     def send_message(self, message="", **kwargs):
         """Send a message to NextCloud Talk."""
         data = {"token":self.roomtoken,"message":message,"actorType":"","actorId":"","actorDisplayName":"","timestamp":0,"messageParameters":[]}
-        resp = self._session.post(self.url + "/chat/"+ self.roomtoken, data=data)
+        resp = self._session.post(self.url + "/ocs/v2.php/apps/spreed/api/v1/chat/"+ self.roomtoken, data=data)
         print(resp.text)
         if resp.status_code == 201:
             success = resp.json()["ocs"]["meta"]["status"]
