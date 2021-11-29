@@ -12,7 +12,7 @@ CONF_ROOMS = "rooms"
 
 
 from homeassistant.const import (
-    CONF_PASSWORD, CONF_ROOM, CONF_URL, CONF_USERNAME)
+    CONF_PASSWORD, CONF_URL, CONF_USERNAME)
 import homeassistant.helpers.config_validation as cv
 
 from homeassistant.components.notify import (ATTR_DATA, PLATFORM_SCHEMA,
@@ -25,7 +25,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_URL): vol.Url(),
     vol.Required(CONF_USERNAME): cv.string,
     vol.Required(CONF_PASSWORD): cv.string,
-    vol.Required(CONF_ROOM): cv.string,
     vol.Optional(CONF_ROOMS, default=[]): vol.All(cv.ensure_list, [cv.string]),
 }
 )
@@ -40,7 +39,7 @@ def get_service(hass, config, discovery_info=None):
     password = config.get(CONF_PASSWORD)
 
     url = config.get(CONF_URL)
-    room = config.get(CONF_ROOM)
+    rooms = config.get(CONF_ROOMS)
 
     try:
         return NextCloudTalkNotificationService(url, username, password, room)
@@ -58,9 +57,12 @@ def get_service(hass, config, discovery_info=None):
 
 class NextCloudTalkNotificationService(BaseNotificationService):
     """Implement the notification service for NextCloud Talk."""
+    EVENT_NCTALK_COMMAND = "nctalk_command"
+    ncclient = None
 
     def __init__(self, url, username, password, room):
         """Initialize the service."""
+        self.hass = hass
         self.url = url
         self.room = room
         self._session = requests.Session()
