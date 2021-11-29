@@ -4,7 +4,7 @@ Send notification to a NextCloud Talk Room.
 
 Original code copied from Home Assistent component Notify and modified for nextcloud Talk.
 
-Tested with Home Assistent 0.97, NextCloud 16.0.3 and Talk 6.0.4
+Tested with Home Assistant 2021.11.5, NextCloud 22.2.3 and Talk 12.1.2
 
 ### Installing
 
@@ -25,6 +25,9 @@ notify:
       username: smarthome  (If you use the subdir, add the directory: https://domain.tld/nextcloud)
       password: Password
       room: smarthome
-
+      rooms: 
+        - "room1"
+        - "login2"
+ 
 
 ```
