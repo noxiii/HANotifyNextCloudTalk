@@ -1,7 +1,6 @@
 import sys
 import time
 from threading import Thread
-
 import requests
 
 # based on ha-matrix-client
@@ -13,20 +12,25 @@ class Room(object):
 
 
 class NextCloudTalkClient(object):
-    interval = 5 # pool interval
+    pool_interval = 5 # pool interval
+    api_version = 'v4'
 
     def __init__(self, base_url, username, password):
         self.sync_thread = None
         self.should_listen = False
         self.rooms = {}
 
-        self.url = base_url
+        self.url = base_url+'/ocs/v2.php/apps/spreed/api'
         self.username = username
         self.password = password
-        self.session = requests.Session()
+        self.session: requests.Session = requests.Session()
         self.session.auth = (username, password)
         self.session.headers.update({'OCS-APIRequest': 'true'})
         self.session.headers.update({'Accept': 'application/json'})
+        if self.session.get(self.url+"/v1/room").status_code == 200:
+            self.api_version = 'v1'
+        if self.session.get(self.url+"/v4/room").status_code == 200:
+            self.api_version = 'v4'
         self.handler = None
 
     def joinRoom(self, room):
@@ -42,7 +46,8 @@ class NextCloudTalkClient(object):
             self.getRoomsInfo()
 
     def getRoomsInfo(self):
-        request_rooms = self.session.get(self.url + "/v4/room")
+
+        request_rooms = self.session.get(self.url + "/"+self.api_version+"/room")
         room_json = request_rooms.json()
         server_rooms = room_json["ocs"]["data"]
         for roomInfo in server_rooms:
@@ -57,7 +62,7 @@ class NextCloudTalkClient(object):
                     server_room = roomInfo
             if server_room == None:                # create conversation for user
                 data = {"roomType": 1, "invite": client_room_name, "roomName": client_room_name}
-                resp = self.session.post(self.url + "/v4/room", data=data)
+                resp = self.session.post(self.url + "/"+self.api_version+"/room", data=data)
                 resp_json = resp.json()
                 created_rooms = resp_json["ocs"]["data"]
                 for roomInfo in created_rooms:
@@ -121,7 +126,7 @@ class NextCloudTalkClient(object):
         while (self.should_listen):
             try:
                 self._sync(timeout_ms)
-                time.sleep(self.interval)
+                time.sleep(self.pool_interval)
                 _bad_sync_timeout = bad_sync_timeout
             except Exception as e:
                 if exception_handler is not None:
