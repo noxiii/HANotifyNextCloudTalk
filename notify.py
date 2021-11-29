@@ -26,7 +26,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_PASSWORD): cv.string,
     vol.Optional(CONF_ROOMS, default=[]): vol.All(cv.ensure_list, [cv.string]),
     vol.Optional(CONF_POOL_INTERVAL, default=5): vol.Range(
-        min=1, max=600
+        min=0, max=600
     ),
 }
 )
@@ -70,12 +70,13 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         self.ncclient = NextCloudTalkClient(base_url=url,
                                             username=username, password=password)
         self.ncclient.handler = self.handler
-        self.ncclient.should_listen = True
-        self.ncclient.start_listener_thread()
         #_LOGGER.warning("nextcloud joining...")
         for room in rooms:
             #_LOGGER.warning("nextcloud join:"+room)
             self.ncclient.joinRoom(room)
+        if (pool_interval > 0) and not(rooms == None) and len(room)>0:
+            self.ncclient.should_listen = True
+            self.ncclient.start_listener_thread()
 
 
 
