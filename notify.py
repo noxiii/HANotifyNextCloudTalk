@@ -3,9 +3,7 @@ import logging
 import voluptuous as vol
 import requests
 import json
-from threading import Thread
-import sys
-import time
+
 from .nextcloudtalkclient import NextCloudTalkClient
 
 CONF_ROOMS = "rooms"
