@@ -5,6 +5,7 @@ Send and receive notification to/from a NextCloud Talk Room.
 Original code copied from Home Assistent component Notify and modified for nextcloud Talk.
 
 nextcloudtalkclient based on ha-matrix-client
+
 notify based on noxiii/HANotifyNextCloudTalk
 
 Tested with Home Assistant 2021.11.5, NextCloud 22.2.3 and Talk 12.1.2
