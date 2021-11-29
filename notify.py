@@ -8,6 +8,8 @@ import sys
 import time
 from .nextcloudtalkclient import NextCloudTalkClient
 
+CONF_ROOMS = "rooms"
+
 
 from homeassistant.const import (
     CONF_PASSWORD, CONF_ROOM, CONF_URL, CONF_USERNAME)
@@ -15,7 +17,6 @@ import homeassistant.helpers.config_validation as cv
 
 from homeassistant.components.notify import (ATTR_DATA, PLATFORM_SCHEMA,
                                              BaseNotificationService)
-CONF_ROOMS = "rooms"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 }
 )
 
-#url="https://cloud.my.domain/ocs/v2.php/apps/spreed/api/v1"
+#url="https://cloud.my.domain/ocs/v2.php/apps/spreed/api/v3"
 #room="smarthome"
 
 def get_service(hass, config, discovery_info=None):
@@ -39,19 +40,20 @@ def get_service(hass, config, discovery_info=None):
     username = config.get(CONF_USERNAME)
     password = config.get(CONF_PASSWORD)
 
-    url = config.get(CONF_URL)+"/ocs/v2.php/apps/spreed/api/v1"
+
+    url = config.get(CONF_URL)+"/ocs/v2.php/apps/spreed/api"
     room = config.get(CONF_ROOM)
     rooms = config.get(CONF_ROOMS)
 
     try:
-        return NextCloudTalkNotificationService(url, username, password, room)
+        return NextCloudTalkNotificationService(hass, url, username, password, rooms)
     except RocketConnectionException:
         _LOGGER.warning(
-            "Unable to connect to Rocket.Chat server at %s", url)
+            "Unable to connect to NextCloud Talk server at %s", url)
 
     except RocketAuthenticationException:
         _LOGGER.warning(
-            "Rocket.Chat authentication failed for user %s", username)
+            "NextCloud Talk authentication failed for user %s", username)
         _LOGGER.info("Please check your username/password")
 
     return None
@@ -62,8 +64,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
     EVENT_NCTALK_COMMAND = "nctalk_command"
     ncclient = None
 
-
-    def __init__(self, url, username, password, room):
+    def __init__(self, hass, url, username, password, rooms):
         """Initialize the service."""
         self.hass = hass
         self.url = url
@@ -78,6 +79,8 @@ class NextCloudTalkNotificationService(BaseNotificationService):
             _LOGGER.warning("nextcloud join:"+room)
             self.ncclient.joinRoom(room)
 
+
+
     def handler(self, room, sender, message):
         ACCEPT = True
         event_data = {
@@ -88,7 +91,6 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         self.hass.bus.fire(self.EVENT_NCTALK_COMMAND, event_data)
         _LOGGER.warning("nextcloud handler:"+sender+":"+message+":"+room)
         return ACCEPT
-
 
     def send_message(self, message="", **kwargs):
         """Send a message to NextCloud Talk."""
@@ -102,6 +104,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         for target in targets:
             """ Get Token/ID for target room """
             self.ncclient.send_message(target, message)
-                          
+
+
                           
 
