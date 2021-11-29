@@ -25,7 +25,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_USERNAME): cv.string,
     vol.Required(CONF_PASSWORD): cv.string,
     vol.Optional(CONF_ROOMS, default=[]): vol.All(cv.ensure_list, [cv.string]),
-    vol.Optional(CONF_POOL_INTERVAL, default=5): vol.Range(
+    vol.Optional(CONF_POOL_INTERVAL, default=0): vol.Range(
         min=0, max=600
     ),
 }
