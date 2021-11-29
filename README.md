@@ -12,14 +12,15 @@ Tested with Home Assistant 2021.11.5, NextCloud 22.2.3 and Talk 12.1.2
 
 ### Installing
 
-Clone the Repository into ./custom_component/ in the HomeAssistent config directory beside the configuration.yaml 
+Clone the Repository into ./custom_component/ in the HomeAssistent config directory beside the configuration.yaml
 Then restart HomeAssistant to load the custom component.
 
 ### Configuration
 
 Create a separate user for the notify. Add this user and your own to a room. Be sure that the name the room is uniq.
 
-Add to the configuration.yaml following lines. Add for every room a separate notify.
+Add to the configuration.yaml following lines.
+
 
 ```
 notify:
@@ -28,8 +29,8 @@ notify:
       url: https://nextcloud.domain.tld
       username: smarthome  (If you use the subdir, add the directory: https://domain.tld/nextcloud)
       password: Password
-      pool_interval: 5
-      rooms: 
+      pool_interval: 5                  #listen for command
+      rooms:                            #listen for command optional
         - "room1"
         - "user1"
         
