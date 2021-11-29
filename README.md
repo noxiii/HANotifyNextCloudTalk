@@ -12,7 +12,7 @@ Tested with Home Assistant 2021.11.5, NextCloud 22.2.3 and Talk 12.1.2
 
 ### Installing
 
-Clone the Repository into ./custom_component/ in the HomeAssistent config directory beside the configuration.yaml 
+Clone the Repository into ./custom_component/ in the HomeAssistent config directory beside the configuration.yaml
 Then restart HomeAssistant to load the custom component.
 
 ### Configuration
