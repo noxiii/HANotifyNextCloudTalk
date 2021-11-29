@@ -117,7 +117,7 @@ class NextCloudTalkClient(object):
                 mmm = self.receive_message(room_name)
                 for msg in mmm:
                     if not (self.handler == None):
-                        if self.handler(room_name, msg['actorId'], msg["message"]): #actorDisplayName
+                        if self.handler(room_name, msg['actorId'], msg["actorDisplayName"], msg["message"]): #actorDisplayName
                             self.mark_read_message(room_name, msg["id"])
 
     def listen_forever(self, timeout_ms=30000, exception_handler=None, bad_sync_timeout=5):

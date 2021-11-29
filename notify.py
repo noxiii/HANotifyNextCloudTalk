@@ -79,11 +79,12 @@ class NextCloudTalkNotificationService(BaseNotificationService):
 
 
 
-    def handler(self, room, sender, message):
+    def handler(self, room, sender, sender_name, message):
         ACCEPT = True
         event_data = {
             "message": message,
             "sender": sender,
+            "sender_name": sender_name,
             "room": room
         }
         self.hass.bus.fire(self.EVENT_NCTALK_COMMAND, event_data)
