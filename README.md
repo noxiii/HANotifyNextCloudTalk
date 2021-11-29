@@ -42,4 +42,27 @@ data:
     - user2
     - room2
   message: temp is {{ states.sensor.atc_temperature_2bab3b.state }}°C
+  
+  
+alias: New automation
+description: ''
+trigger:
+  - platform: event
+    event_type: nctalk_command
+    event_data: {}
+condition:
+  - condition: template
+    value_template: '{{ trigger.event.data.message.upper() == "DOIT"}}'
+action:
+  - service: notify.nextcloudtalk
+    data:
+      message: >-
+        do {{ trigger.event.data.message }} for {{
+        trigger.event.data.sender }}
+      target: '{{trigger.event.data.room}}'
+  - service: switch.toggle
+    target:
+      entity_id: switch.living_room_dehumidifier_2
+mode: single
+
 ```
