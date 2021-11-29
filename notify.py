@@ -3,6 +3,13 @@ import logging
 import voluptuous as vol
 import requests
 import json
+from threading import Thread
+import sys
+import time
+from .nextcloudtalkclient import NextCloudTalkClient
+
+CONF_ROOMS = "rooms"
+
 
 from homeassistant.const import (
     CONF_PASSWORD, CONF_ROOM, CONF_URL, CONF_USERNAME)
@@ -10,7 +17,6 @@ import homeassistant.helpers.config_validation as cv
 
 from homeassistant.components.notify import (ATTR_DATA, PLATFORM_SCHEMA,
                                              BaseNotificationService)
-from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,8 +25,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_URL): vol.Url(),
     vol.Required(CONF_USERNAME): cv.string,
     vol.Required(CONF_PASSWORD): cv.string,
-    vol.Optional(CONF_ROOM): cv.string,
-})
+    vol.Required(CONF_ROOM): cv.string,
+    vol.Optional(CONF_ROOMS, default=[]): vol.All(cv.ensure_list, [cv.string]),
+}
+)
 
 
 def get_service(hass, config, discovery_info=None):
