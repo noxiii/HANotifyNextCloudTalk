@@ -9,7 +9,7 @@ from .nextcloudtalkclient import NextCloudTalkClient
 CONF_ROOMS = "rooms"
 CONF_POOL_INTERVAL = "pool_interval"
 
-#CONF_ROOM,
+# CONF_ROOM,
 from homeassistant.const import (
     CONF_PASSWORD, CONF_URL, CONF_USERNAME)
 import homeassistant.helpers.config_validation as cv
@@ -30,6 +30,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     ),
 }
 )
+
 
 def get_service(hass, config, discovery_info=None):
     """Return the notify service."""
@@ -70,15 +71,13 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         self.ncclient = NextCloudTalkClient(base_url=url,
                                             username=username, password=password)
         self.ncclient.handler = self.handler
-        #_LOGGER.warning("nextcloud joining...")
+        # _LOGGER.warning("nextcloud joining...")
         for room in rooms:
-            #_LOGGER.warning("nextcloud join:"+room)
+            # _LOGGER.warning("nextcloud join:"+room)
             self.ncclient.joinRoom(room)
-        if (pool_interval > 0) and not(rooms == None) and len(room)>0:
+        if not (pool_interval is None) and not (rooms is None) and (pool_interval > 0) and len(room) > 0:
             self.ncclient.should_listen = True
             self.ncclient.start_listener_thread()
-
-
 
     def handler(self, room, sender, sender_name, message):
         ACCEPT = True
@@ -89,12 +88,12 @@ class NextCloudTalkNotificationService(BaseNotificationService):
             "room": room
         }
         self.hass.bus.fire(self.EVENT_NCTALK_COMMAND, event_data)
-        #_LOGGER.warning("nextcloud handler:"+sender+":"+message+":"+room)
+        # _LOGGER.warning("nextcloud handler:"+sender+":"+message+":"+room)
         return ACCEPT
 
     def send_message(self, message="", **kwargs):
         """Send a message to NextCloud Talk."""
-        #_LOGGER.error(kwargs)
+        # _LOGGER.error(kwargs)
         targets = kwargs["target"]
 
         if not targets:
@@ -104,7 +103,3 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         for target in targets:
             """ Get Token/ID for target room """
             self.ncclient.send_message(target, message)
-
-
-                          
-
