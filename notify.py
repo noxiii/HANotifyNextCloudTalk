@@ -3,17 +3,15 @@ import logging
 import voluptuous as vol
 import requests
 import json
-from threading import Thread
-import sys
-import time
+
 from .nextcloudtalkclient import NextCloudTalkClient
 
 CONF_ROOMS = "rooms"
 CONF_POOL_INTERVAL = "pool_interval"
 
-
+#CONF_ROOM,
 from homeassistant.const import (
-    CONF_PASSWORD, CONF_ROOM, CONF_URL, CONF_USERNAME)
+    CONF_PASSWORD, CONF_URL, CONF_USERNAME)
 import homeassistant.helpers.config_validation as cv
 
 from homeassistant.components.notify import (ATTR_DATA, PLATFORM_SCHEMA,
@@ -26,16 +24,12 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_URL): vol.Url(),
     vol.Required(CONF_USERNAME): cv.string,
     vol.Required(CONF_PASSWORD): cv.string,
-    vol.Required(CONF_ROOM): cv.string,
     vol.Optional(CONF_ROOMS, default=[]): vol.All(cv.ensure_list, [cv.string]),
     vol.Optional(CONF_POOL_INTERVAL, default=5): vol.Range(
         min=1, max=600
     ),
 }
 )
-
-#url="https://cloud.my.domain/ocs/v2.php/apps/spreed/api/v3"
-#room="smarthome"
 
 def get_service(hass, config, discovery_info=None):
     """Return the notify service."""
@@ -46,7 +40,6 @@ def get_service(hass, config, discovery_info=None):
     pool_interval = config.get(CONF_POOL_INTERVAL)
 
     url = config.get(CONF_URL)
-    room = config.get(CONF_ROOM)
     rooms = config.get(CONF_ROOMS)
 
     try:
