@@ -7,6 +7,7 @@ import json
 from .nextcloudtalkclient import NextCloudTalkClient
 
 CONF_ROOMS = "rooms"
+CONF_POOL_INTERVAL = "pool_interval"
 
 
 from homeassistant.const import (
@@ -28,6 +29,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 )
 
 
+
 def get_service(hass, config, discovery_info=None):
     """Return the notify service."""
     # from nextcloudtalk_API.APIExceptions.NextcloudExceptions import (
@@ -35,19 +37,20 @@ def get_service(hass, config, discovery_info=None):
 
     username = config.get(CONF_USERNAME)
     password = config.get(CONF_PASSWORD)
+    pool_interval = config.get(CONF_POOL_INTERVAL)
 
     url = config.get(CONF_URL)
     rooms = config.get(CONF_ROOMS)
 
     try:
-        return NextCloudTalkNotificationService(url, username, password, room)
-    # except NextcloudConnectionException:
-    #    _LOGGER.warning(
-    #        "Unable to connect to Nextcloud Talk server at %s", url)
-
-    except NextcloudAuthenticationException:
+        return NextCloudTalkNotificationService(hass, url, username, password, rooms, pool_interval)
+    except RocketConnectionException:
         _LOGGER.warning(
-            "Nextcloud authentication failed for user %s", username)
+            "Unable to connect to NextCloud Talk server at %s", url)
+
+    except RocketAuthenticationException:
+        _LOGGER.warning(
+            "NextCloud Talk authentication failed for user %s", username)
         _LOGGER.info("Please check your username/password")
 
     return None
@@ -58,7 +61,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
     EVENT_NCTALK_COMMAND = "nctalk_command"
     ncclient = None
 
-    def __init__(self, url, username, password, room):
+    def __init__(self, hass, url, username, password, rooms, pool_interval):
         """Initialize the service."""
         self.hass = hass
         self.url = url
@@ -83,10 +86,11 @@ class NextCloudTalkNotificationService(BaseNotificationService):
     def send_message(self, message="", **kwargs):
         """Send a message to NextCloud Talk."""
         targets = kwargs["target"]
-        if not targets and not (self.room is None):
-            targets = {self.room}
+
         if not targets:
-            _LOGGER.error("NextCloud Talk message no targets")
+            _LOGGER.error("At least 1 target is required")
+            return
+
         for target in targets:
             """ Get Token/ID for target room """
             if target in self.room_tokens:
