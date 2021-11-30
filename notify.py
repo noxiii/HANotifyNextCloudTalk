@@ -25,16 +25,17 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_USERNAME): cv.string,
     vol.Required(CONF_PASSWORD): cv.string,
     vol.Optional(CONF_ROOMS, default=[]): vol.All(cv.ensure_list, [cv.string]),
+    vol.Optional(CONF_POOL_INTERVAL, default=0): vol.Range(
+        min=0, max=600
+    ),
 }
 )
 
 
-
 def get_service(hass, config, discovery_info=None):
     """Return the notify service."""
-    # from nextcloudtalk_API.APIExceptions.NextcloudExceptions import (
-    #    NextcloudConnectionException, NextcloudAuthenticationException)
-
+    from rocketchat_API.APIExceptions.RocketExceptions import (
+        RocketConnectionException, RocketAuthenticationException)
     username = config.get(CONF_USERNAME)
     password = config.get(CONF_PASSWORD)
     pool_interval = config.get(CONF_POOL_INTERVAL)
@@ -71,20 +72,21 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         self._session.headers.update({'OCS-APIRequest': 'true'})
         self._session.headers.update({'Accept': 'application/json'})
 
-        """ Get Token/ID for Room """
-        prefix = "/ocs/v2.php/apps/spreed/api/"
-        request_rooms = self._session.get(self.url + prefix + "v4/room")
-        if request_rooms.status_code != 200:
-            request_rooms = self._session.get(self.url + prefix + "v1/room")
-        room_json = request_rooms.json()
-        rooms = room_json["ocs"]["data"]
-        self.room_tokens = {}
-        for roomInfo in rooms:
-            if roomInfo["name"] == self.room:
-                self.room_tokens[roomInfo["name"]] = roomInfo["token"]
+    def handler(self, room, sender, sender_name, message):
+        ACCEPT = True
+        event_data = {
+            "message": message,
+            "sender": sender,
+            "sender_name": sender_name,
+            "room": room
+        }
+        self.hass.bus.fire(self.EVENT_NCTALK_COMMAND, event_data)
+        # _LOGGER.warning("nextcloud handler:"+sender+":"+message+":"+room)
+        return ACCEPT
 
     def send_message(self, message="", **kwargs):
         """Send a message to NextCloud Talk."""
+        # _LOGGER.error(kwargs)
         targets = kwargs["target"]
 
         if not targets:
@@ -93,19 +95,4 @@ class NextCloudTalkNotificationService(BaseNotificationService):
 
         for target in targets:
             """ Get Token/ID for target room """
-            if target in self.room_tokens:
-                roomtoken = self.room_tokens[target]
-                data = {"token": roomtoken, "message": message, "actorType": "",
-                        "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
-                prefix = "/ocs/v2.php/apps/spreed/api/v1"
-                resp = self._session.post(
-                    self.url + prefix + "/chat/" + roomtoken, data=data)
-                if resp.status_code == 201:
-                    success = resp.json()["ocs"]["meta"]["status"]
-                    if not success:
-                        _LOGGER.error("Unable to post NextCloud Talk message")
-                else:
-                    _LOGGER.error("Incorrect status code when posting message: %d",
-                                  resp.status_code)
-            else:
-                _LOGGER.error("Unable to post NextCloud Talk message: no token for: %s", target)
+            self.ncclient.send_message(target, message)
