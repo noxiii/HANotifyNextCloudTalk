@@ -9,7 +9,7 @@ from .nextcloudtalkclient import NextCloudTalkClient
 CONF_ROOMS = "rooms"
 CONF_POOL_INTERVAL = "pool_interval"
 
-
+# CONF_ROOM,
 from homeassistant.const import (
     CONF_PASSWORD, CONF_URL, CONF_USERNAME)
 import homeassistant.helpers.config_validation as cv
