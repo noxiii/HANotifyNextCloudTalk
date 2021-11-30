@@ -75,9 +75,13 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         for room in rooms:
             # _LOGGER.warning("nextcloud join:"+room)
             self.ncclient.joinRoom(room)
-        if not (pool_interval is None) and not (rooms is None) and (pool_interval > 0) and len(room) > 0:
+        if not (pool_interval is None) and not (rooms is None) and (pool_interval > 0) and len(rooms) > 0:
             self.ncclient.should_listen = True
             self.ncclient.start_listener_thread()
+            _LOGGER.warning("nextcloudtalk pool enabled by config (pool_interval="+str(pool_interval)+" rooms="+str(len(rooms)))
+        else:
+            _LOGGER.warning("nextcloudtalk pool disabled by config (pool_interval=0 or empty rooms)")
+
 
     def handler(self, room, sender, sender_name, message):
         ACCEPT = True
