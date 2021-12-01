@@ -34,10 +34,11 @@ notify:
       rooms:                            #listen for command optional
         - "room1"
         - "user1"
-        
+```        
 ### Automation usage:
 
 #### Sending message
+```
 service: notify.nextcloudtalk
 data:
   target: #required
@@ -45,8 +46,9 @@ data:
     - user2
     - room2
   message: temp is {{ states.sensor.atc_temperature_2bab3b.state }}°C
-  
+```  
 #### Receiving messages  
+```
 alias: New automation
 description: ''
 trigger:
