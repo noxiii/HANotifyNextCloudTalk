@@ -27,24 +27,26 @@ notify:
     - platform: nextcloudtalk
       name: nextcloudtalk
       url: https://nextcloud.domain.tld
-      username: smarthome  (If you use the subdir, add the directory: https://domain.tld/nextcloud)
+      #url: https://domain.tld/nextcloud
+      username: smarthome 
       password: Password
-      pool_interval: 5                  #listen for command
+      pool_interval: 5                  #listen for command optional, disabled if miss or =0
       rooms:                            #listen for command optional
         - "room1"
         - "user1"
         
-automation usage:
+### Automation usage:
 
+#### Sending message
 service: notify.nextcloudtalk
 data:
-  target:
+  target: #required
     - user1
     - user2
     - room2
   message: temp is {{ states.sensor.atc_temperature_2bab3b.state }}°C
   
-  
+#### Receiving messages  
 alias: New automation
 description: ''
 trigger:
