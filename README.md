@@ -62,8 +62,7 @@ action:
   - service: notify.nextcloudtalk
     data:
       message: >-
-        do {{ trigger.event.data.message }} for {{
-        trigger.event.data.sender }}
+        do {{ trigger.event.data.message }} for {{ trigger.event.data.sender }} aka  {{ trigger.event.data.sender_name }}
       target: '{{trigger.event.data.room}}'
   - service: switch.toggle
     target:
