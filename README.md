@@ -4,7 +4,7 @@ Send notification to a NextCloud Talk Room.
 
 Original code copied from Home Assistent component Notify and modified for nextcloud Talk.
 
-Tested with Home Assistent 2021.11, NextCloud 21 and Talk 12
+Tested with Home Assistent 2021.11, NextCloud 22 and Talk 12
 
 ### Installing
 
