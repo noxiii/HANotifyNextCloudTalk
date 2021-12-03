@@ -10,6 +10,7 @@ import homeassistant.helpers.config_validation as cv
 
 from homeassistant.components.notify import (ATTR_DATA, PLATFORM_SCHEMA,
                                              BaseNotificationService)
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,13 +23,12 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_API_VERSION): cv.string,
 })
 
-#url="https://cloud.my.domain/ocs/v2.php/apps/spreed/api/v1"
-#room="smarthome"
 
 def get_service(hass, config, discovery_info=None):
     """Return the notify service."""
-    from rocketchat_API.APIExceptions.RocketExceptions import (
-        RocketConnectionException, RocketAuthenticationException)
+    # from nextcloudtalk_API.APIExceptions.NextcloudExceptions import (
+    #    NextcloudConnectionException, NextcloudAuthenticationException)
+
     username = config.get(CONF_USERNAME)
     password = config.get(CONF_PASSWORD)
 
@@ -38,13 +38,13 @@ def get_service(hass, config, discovery_info=None):
 
     try:
         return NextCloudTalkNotificationService(url, username, password, room, version)
-    except RocketConnectionException:
-        _LOGGER.warning(
-            "Unable to connect to Rocket.Chat server at %s", url)
+    # except NextcloudConnectionException:
+    #    _LOGGER.warning(
+    #        "Unable to connect to Nextcloud Talk server at %s", url)
 
-    except RocketAuthenticationException:
+    except NextcloudAuthenticationException:
         _LOGGER.warning(
-            "Rocket.Chat authentication failed for user %s", username)
+            "Nextcloud authentication failed for user %s", username)
         _LOGGER.info("Please check your username/password")
 
     return None
@@ -62,7 +62,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         self._session.auth = (username, password)
         self._session.headers.update({'OCS-APIRequest': 'true'})
         self._session.headers.update({'Accept': 'application/json'})
-        
+
         """ Get Token/ID for Room """
         prefix = "/ocs/v2.php/apps/spreed/api/v1"
         if self.version >= 12:
@@ -72,14 +72,15 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         rooms = room_json["ocs"]["data"]
         for roomInfo in rooms:
             if roomInfo["name"] == self.room:
-               self.roomtoken = roomInfo["token"]
-    
-    
+                self.roomtoken = roomInfo["token"]
+
     def send_message(self, message="", **kwargs):
         """Send a message to NextCloud Talk."""
-        data = {"token":self.roomtoken,"message":message,"actorType":"","actorId":"","actorDisplayName":"","timestamp":0,"messageParameters":[]}
+        data = {"token": self.roomtoken, "message": message, "actorType": "",
+                "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
         prefix = "/ocs/v2.php/apps/spreed/api/v1"
-        resp = self._session.post(self.url + prefix + "/chat/"+ self.roomtoken, data=data)
+        resp = self._session.post(
+            self.url + prefix + "/chat/" + self.roomtoken, data=data)
         print(resp.text)
         if resp.status_code == 201:
             success = resp.json()["ocs"]["meta"]["status"]
@@ -88,6 +89,3 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         else:
             _LOGGER.error("Incorrect status code when posting message: %d",
                           resp.status_code)
-                          
-                          
-
