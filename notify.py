@@ -26,6 +26,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 def get_service(hass, config, discovery_info=None):
     """Return the notify service."""
+    #from nextcloudtalk_API.APIExceptions.NextcloudExceptions import (
+    #    NextcloudConnectionException, NextcloudAuthenticationException)
+
     username = config.get(CONF_USERNAME)
     password = config.get(CONF_PASSWORD)
 
@@ -34,9 +37,9 @@ def get_service(hass, config, discovery_info=None):
 
     try:
         return NextCloudTalkNotificationService(url, username, password, room)
-    except NextcloudConnectionException:
-        _LOGGER.warning(
-            "Unable to connect to Nextcloud Talk server at %s", url)
+    #except NextcloudConnectionException:
+    #    _LOGGER.warning(
+    #        "Unable to connect to Nextcloud Talk server at %s", url)
 
     except NextcloudAuthenticationException:
         _LOGGER.warning(
