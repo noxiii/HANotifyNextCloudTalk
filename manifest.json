@@ -1,10 +1,12 @@
 {
-  "domain": "https://github.com/noxiii/HANextcloudTalk",
+  "domain": "nextcloudtalk",
   "name": "NextCloud Talk",
   "documentation": "https://github.com/noxiii/HANextcloudTalk",
+  "version": "1.0",
   "requirements": [
     "requests"
   ],
   "dependencies": [],
-  "codeowners": []
+  "codeowners": [],
+  "iot_class": "cloud_polling"
 }
