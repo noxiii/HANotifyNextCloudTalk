@@ -4,13 +4,13 @@ import voluptuous as vol
 import requests
 import json
 
-from .const import DOMAIN
 from homeassistant.const import (
     CONF_PASSWORD, CONF_ROOM, CONF_URL, CONF_USERNAME, CONF_API_VERSION)
 import homeassistant.helpers.config_validation as cv
 
 from homeassistant.components.notify import (ATTR_DATA, PLATFORM_SCHEMA,
                                              BaseNotificationService)
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
