@@ -2,7 +2,7 @@
   "domain": "nextcloudtalk",
   "name": "NextCloud Talk",
   "documentation": "https://github.com/noxiii/HANextcloudTalk",
-  "version": "1.0",
+  "version": "2021.12",
   "requirements": [
     "requests"
   ],
