@@ -66,7 +66,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         """ Get Token/ID for Room """
         prefix = "/ocs/v2.php/apps/spreed/api/v1"
         if self.version >= 12:
-            prefix = "/ocs/v2.php/apps/spreed/api/v4"
+          prefix = "/ocs/v2.php/apps/spreed/api/v4"
         request_rooms = self._session.get(self.url+prefix+"/room")
         room_json = request_rooms.json()
         rooms = room_json["ocs"]["data"]
