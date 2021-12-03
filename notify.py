@@ -4,6 +4,7 @@ import voluptuous as vol
 import requests
 import json
 
+from .const import DOMAIN
 from homeassistant.const import (
     CONF_PASSWORD, CONF_ROOM, CONF_URL, CONF_USERNAME, CONF_API_VERSION)
 import homeassistant.helpers.config_validation as cv
@@ -21,9 +22,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_ROOM): cv.string,
     vol.Required(CONF_API_VERSION): cv.string,
 })
-
-# url="https://cloud.my.domain/ocs/v2.php/apps/spreed/api/v1"
-# room="smarthome"
 
 
 def get_service(hass, config, discovery_info=None):
