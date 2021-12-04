@@ -85,7 +85,14 @@ class NextCloudTalkClient(object):
         else:
             print("Incorrect status code when posting message: %d", resp.status_code)
         return None
-
+    def send_file(self,room_name, message, path_file): #PUT /owncloud/remote.php/dav/files/p2n/Talk/2021-12-04%2015-53-24.jpg
+        roomtoken = self.rooms[room_name].token
+        data = {"token": roomtoken, "message": message, "actorType": "", "actorId": "", "actorDisplayName": "",
+                "timestamp": 0, "messageParameters": []}
+        self.session.put(self.url + '/remote.php/dav/files/p2n/Talk/', files=path_file, )
+        resp = self.session.post(self.url + "/v1/chat/" + roomtoken, data=data)
+        print(resp)
+        return None
     def mark_read_message(self, room_name, id_message):
         data = {"lastReadMessage": id_message}
         resp = self.session.post(self.url + "/v1/chat/" + self.rooms[room_name].token + "/read", data=data)
