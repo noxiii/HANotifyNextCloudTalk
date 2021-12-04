@@ -27,10 +27,10 @@ class NextCloudTalkClient(object):
         self.session.auth = (username, password)
         self.session.headers.update({'OCS-APIRequest': 'true'})
         self.session.headers.update({'Accept': 'application/json'})
-        if self.session.get(self.url+"/v1/room").status_code == 200:
-            self.api_version = 'v1'
         if self.session.get(self.url+"/v4/room").status_code == 200:
             self.api_version = 'v4'
+        elif self.session.get(self.url+"/v1/room").status_code == 200:
+            self.api_version = 'v1'
         self.handler = None
 
     def joinRoom(self, room):

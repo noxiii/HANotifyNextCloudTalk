@@ -34,8 +34,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 def get_service(hass, config, discovery_info=None):
     """Return the notify service."""
-    from rocketchat_API.APIExceptions.RocketExceptions import (
-        RocketConnectionException, RocketAuthenticationException)
     username = config.get(CONF_USERNAME)
     password = config.get(CONF_PASSWORD)
     pool_interval = config.get(CONF_POOL_INTERVAL)
@@ -43,18 +41,7 @@ def get_service(hass, config, discovery_info=None):
     url = config.get(CONF_URL)
     rooms = config.get(CONF_ROOMS)
 
-    try:
-        return NextCloudTalkNotificationService(hass, url, username, password, rooms, pool_interval)
-    except RocketConnectionException:
-        _LOGGER.warning(
-            "Unable to connect to NextCloud Talk server at %s", url)
-
-    except RocketAuthenticationException:
-        _LOGGER.warning(
-            "NextCloud Talk authentication failed for user %s", username)
-        _LOGGER.info("Please check your username/password")
-
-    return None
+    return NextCloudTalkNotificationService(hass, url, username, password, rooms, pool_interval)
 
 
 class NextCloudTalkNotificationService(BaseNotificationService):
