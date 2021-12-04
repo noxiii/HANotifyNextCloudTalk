@@ -35,7 +35,7 @@ def get_service(hass, config, discovery_info=None):
     room = config.get(CONF_ROOM)
 
     try:
-        return NextCloudTalkNotificationService(url, username, password, room, version)
+        return NextCloudTalkNotificationService(url, username, password, room)
     # except NextcloudConnectionException:
     #    _LOGGER.warning(
     #        "Unable to connect to Nextcloud Talk server at %s", url)
@@ -51,11 +51,10 @@ def get_service(hass, config, discovery_info=None):
 class NextCloudTalkNotificationService(BaseNotificationService):
     """Implement the notification service for NextCloud Talk."""
 
-    def __init__(self, url, username, password, room, version):
+    def __init__(self, url, username, password, room):
         """Initialize the service."""
         self.url = url
         self.room = room
-        self.version = version
         self._session = requests.Session()
         self._session.auth = (username, password)
         self._session.headers.update({'OCS-APIRequest': 'true'})
@@ -63,14 +62,9 @@ class NextCloudTalkNotificationService(BaseNotificationService):
 
         """ Get Token/ID for Room """
         prefix = "/ocs/v2.php/apps/spreed/api/"
-        if self.session.get(self.url+prefix+"v1/room").status_code == 200:
-            self.api_version = 'v1'
-        if self.session.get(self.url+prefix+"v4/room").status_code == 200:
-            self.api_version = 'v4'
-
-        prefix = prefix+self.api_version
-
-        request_rooms = self._session.get(self.url+prefix+"/room")
+        request_rooms = self._session.get(self.url+prefix+"v4/room")
+        if request_rooms.status_code != 200:
+            request_rooms = self._session.get(self.url+prefix+"v1/room")
         room_json = request_rooms.json()
         rooms = room_json["ocs"]["data"]
         for roomInfo in rooms:
