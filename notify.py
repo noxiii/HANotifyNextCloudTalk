@@ -71,7 +71,6 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         self.room_tokens = {}
         for roomInfo in rooms:
             if roomInfo["name"] == self.room:
-                self.roomtoken = roomInfo["token"]
                 self.room_tokens[roomInfo["name"]] = roomInfo["token"]
 
     def send_message(self, message="", **kwargs):
@@ -79,7 +78,6 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         targets = kwargs["target"]
         if not targets:
             targets = {self.room}
-#             _LOGGER.error("At least 1 target is required")
         for target in targets:
             """ Get Token/ID for target room """
             if target in self.room_tokens:
