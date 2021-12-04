@@ -1,4 +1,5 @@
 """NextCloud Talk notification service."""
+import collections
 import logging
 import voluptuous as vol
 import requests
@@ -67,22 +68,33 @@ class NextCloudTalkNotificationService(BaseNotificationService):
             request_rooms = self._session.get(self.url+prefix+"v1/room")
         room_json = request_rooms.json()
         rooms = room_json["ocs"]["data"]
+        self.room_tokens = {}
         for roomInfo in rooms:
             if roomInfo["name"] == self.room:
                 self.roomtoken = roomInfo["token"]
+                self.room_tokens[roomInfo["name"]] = roomInfo["token"]
 
     def send_message(self, message="", **kwargs):
         """Send a message to NextCloud Talk."""
-        data = {"token": self.roomtoken, "message": message, "actorType": "",
-                "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
-        prefix = "/ocs/v2.php/apps/spreed/api/v1"
-        resp = self._session.post(
-            self.url + prefix + "/chat/" + self.roomtoken, data=data)
-        print(resp.text)
-        if resp.status_code == 201:
-            success = resp.json()["ocs"]["meta"]["status"]
-            if not success:
-                _LOGGER.error("Unable to post NextCloud Talk message")
-        else:
-            _LOGGER.error("Incorrect status code when posting message: %d",
-                          resp.status_code)
+        targets = kwargs["target"]
+        if not targets:
+            targets = {self.room}
+#             _LOGGER.error("At least 1 target is required")
+        for target in targets:
+            """ Get Token/ID for target room """
+            if target in self.room_tokens:
+                roomtoken =  self.room_tokens[target]
+                data = {"token": roomtoken, "message": message, "actorType": "",
+                            "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
+                prefix = "/ocs/v2.php/apps/spreed/api/v1"
+                resp = self._session.post(
+                        self.url + prefix + "/chat/" + roomtoken, data=data)
+                if resp.status_code == 201:
+                    success = resp.json()["ocs"]["meta"]["status"]
+                    if not success:
+                        _LOGGER.error("Unable to post NextCloud Talk message")
+                else:
+                    _LOGGER.error("Incorrect status code when posting message: %d",
+                              resp.status_code)
+            else:
+                _LOGGER.error("Unable to post NextCloud Talk message: no token for: %s", target)
