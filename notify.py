@@ -5,7 +5,7 @@ import requests
 import json
 
 from homeassistant.const import (
-    CONF_PASSWORD, CONF_ROOM, CONF_URL, CONF_USERNAME, CONF_API_VERSION)
+    CONF_PASSWORD, CONF_ROOM, CONF_URL, CONF_USERNAME)
 import homeassistant.helpers.config_validation as cv
 
 from homeassistant.components.notify import (ATTR_DATA, PLATFORM_SCHEMA,
