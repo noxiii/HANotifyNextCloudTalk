@@ -63,9 +63,9 @@ class NextCloudTalkNotificationService(BaseNotificationService):
 
         """ Get Token/ID for Room """
         prefix = "/ocs/v2.php/apps/spreed/api/"
-        request_rooms = self._session.get(self.url+prefix+"v4/room")
+        request_rooms = self._session.get(self.url + prefix + "v4/room")
         if request_rooms.status_code != 200:
-            request_rooms = self._session.get(self.url+prefix+"v1/room")
+            request_rooms = self._session.get(self.url + prefix + "v1/room")
         room_json = request_rooms.json()
         rooms = room_json["ocs"]["data"]
         self.room_tokens = {}
@@ -76,23 +76,25 @@ class NextCloudTalkNotificationService(BaseNotificationService):
     def send_message(self, message="", **kwargs):
         """Send a message to NextCloud Talk."""
         targets = kwargs["target"]
-        if not targets:
+        if not targets and not (self.room is None):
             targets = {self.room}
+        if not targets:
+            _LOGGER.error("NextCloud Talk message no targets")
         for target in targets:
             """ Get Token/ID for target room """
             if target in self.room_tokens:
-                roomtoken =  self.room_tokens[target]
+                roomtoken = self.room_tokens[target]
                 data = {"token": roomtoken, "message": message, "actorType": "",
-                            "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
+                        "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
                 prefix = "/ocs/v2.php/apps/spreed/api/v1"
                 resp = self._session.post(
-                        self.url + prefix + "/chat/" + roomtoken, data=data)
+                    self.url + prefix + "/chat/" + roomtoken, data=data)
                 if resp.status_code == 201:
                     success = resp.json()["ocs"]["meta"]["status"]
                     if not success:
                         _LOGGER.error("Unable to post NextCloud Talk message")
                 else:
                     _LOGGER.error("Incorrect status code when posting message: %d",
-                              resp.status_code)
+                                  resp.status_code)
             else:
                 _LOGGER.error("Unable to post NextCloud Talk message: no token for: %s", target)
