@@ -1,5 +1,4 @@
 """NextCloud Talk notification service."""
-import collections
 import logging
 import voluptuous as vol
 import requests
@@ -68,7 +67,6 @@ class NextCloudTalkNotificationService(BaseNotificationService):
             request_rooms = self._session.get(self.url + prefix + "v1/room")
         room_json = request_rooms.json()
         rooms = room_json["ocs"]["data"]
-        self.room_tokens = {}
         for roomInfo in rooms:
             if roomInfo["name"] == self.room:
                 self.room_tokens[roomInfo["name"]] = roomInfo["token"]
