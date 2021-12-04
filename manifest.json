@@ -1,6 +1,7 @@
 {
   "domain": "nextcloudtalk",
   "name": "Nextcloud Talk",
+  "config_flow": true,
   "documentation": "https://github.com/noxiii/HANextcloudTalk",
   "version": "2021.12",
   "requirements": [
@@ -8,6 +9,5 @@
   ],
   "dependencies": [],
   "codeowners": [],
-  "config_flow": true,
   "iot_class": "cloud_polling"
 }

@@ -1,2 +1,3 @@
-"""Constants for the Nextcloud Talk component."""
-DOMAIN = "nextcloud"
+"""Constants for the Nextcloud Talk integration."""
+
+DOMAIN = "nextcloudtalk"
