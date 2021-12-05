@@ -32,9 +32,9 @@ class NextCloudTalkClient(object):
         self.attachments_folder = self.caps["ocs"]["data"]["capabilities"]["spreed"]["config"]["attachments"]['folder']
         self.attachments_allowed = self.caps["ocs"]["data"]["capabilities"]["spreed"]["config"]["attachments"]['allowed']
         self.webdav_root = self.caps["ocs"]["data"]["capabilities"]['core']['webdav-root']
-#        print('caps0',self.caps)
-#        print('webdav-root',self.webdav_root)
-#        print("caps1:",self.caps["ocs"]["data"]["capabilities"]["spreed"])
+        #        print('caps0',self.caps)
+        #        print('webdav-root',self.webdav_root)
+        #        print("caps1:",self.caps["ocs"]["data"]["capabilities"]["spreed"])
         if 'conversation-v4' in self.caps["ocs"]["data"]["capabilities"]["spreed"]["features"]:
             self.api_version = 'v4'
         else:
