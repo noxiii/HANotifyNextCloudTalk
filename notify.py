@@ -4,8 +4,14 @@ import voluptuous as vol
 import requests
 import json
 
+from .nextcloudtalkclient import NextCloudTalkClient
+
+CONF_ROOMS = "rooms"
+CONF_POOL_INTERVAL = "pool_interval"
+
+# CONF_ROOM,
 from homeassistant.const import (
-    CONF_PASSWORD, CONF_ROOM, CONF_URL, CONF_USERNAME)
+    CONF_PASSWORD, CONF_URL, CONF_USERNAME)
 import homeassistant.helpers.config_validation as cv
 
 from homeassistant.components.notify import (ATTR_DATA, PLATFORM_SCHEMA,
@@ -32,11 +38,8 @@ def get_service(hass, config, discovery_info=None):
     password = config.get(CONF_PASSWORD)
     pool_interval = config.get(CONF_POOL_INTERVAL)
 
-    try:
-        return NextCloudTalkNotificationService(url, username, password, room)
-    except RocketConnectionException:
-        _LOGGER.warning(
-            "Unable to connect to Rocket.Chat server at %s", url)
+    url = config.get(CONF_URL)
+    rooms = config.get(CONF_ROOMS)
 
     return NextCloudTalkNotificationService(hass, url, username, password, rooms, pool_interval)
 
