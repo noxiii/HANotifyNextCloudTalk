@@ -19,7 +19,7 @@ class NextCloudTalkClient(object):
         self.sync_thread = None
         self.should_listen = False
         self.rooms = {}
-
+        self.base_url = base_url
         self.url = base_url+'/ocs/v2.php/apps/spreed/api'
         self.username = username
         self.password = password
@@ -27,9 +27,17 @@ class NextCloudTalkClient(object):
         self.session.auth = (username, password)
         self.session.headers.update({'OCS-APIRequest': 'true'})
         self.session.headers.update({'Accept': 'application/json'})
-        if self.session.get(self.url+"/v4/room").status_code == 200:
+
+        self.caps = self.session.get(base_url+"/ocs/v1.php/cloud/capabilities").json()
+        self.attachments_folder = self.caps["ocs"]["data"]["capabilities"]["spreed"]["config"]["attachments"]['folder']
+        self.attachments_allowed = self.caps["ocs"]["data"]["capabilities"]["spreed"]["config"]["attachments"]['allowed']
+        self.webdav_root = self.caps["ocs"]["data"]["capabilities"]['core']['webdav-root']
+#        print('caps0',self.caps)
+#        print('webdav-root',self.webdav_root)
+#        print("caps1:",self.caps["ocs"]["data"]["capabilities"]["spreed"])
+        if 'conversation-v4' in self.caps["ocs"]["data"]["capabilities"]["spreed"]["features"]:
             self.api_version = 'v4'
-        elif self.session.get(self.url+"/v1/room").status_code == 200:
+        else:
             self.api_version = 'v1'
         self.handler = None
 
@@ -85,14 +93,27 @@ class NextCloudTalkClient(object):
         else:
             print("Incorrect status code when posting message: %d", resp.status_code)
         return None
-    def send_file(self,room_name, message, path_file): #PUT /owncloud/remote.php/dav/files/p2n/Talk/2021-12-04%2015-53-24.jpg
+    def send_file(self,room_name, path_file):
         roomtoken = self.rooms[room_name].token
-        data = {"token": roomtoken, "message": message, "actorType": "", "actorId": "", "actorDisplayName": "",
-                "timestamp": 0, "messageParameters": []}
-        self.session.put(self.url + '/remote.php/dav/files/p2n/Talk/', files=path_file, )
-        resp = self.session.post(self.url + "/v1/chat/" + roomtoken, data=data)
-        print(resp)
-        return None
+        filename = path_file.split('/')[-1:][0]
+        attachments_url = self.base_url+'/'+self.webdav_root+self.attachments_folder+'/'+filename
+        print('attachments_url',attachments_url)
+        file = open(path_file,'rb')
+        resp = self.session.put(attachments_url, data=file)
+        if not(resp.status_code in (200,201,202,204)):
+            print('upload error',resp.status_code,resp.content)
+            return resp.status_code
+        print(resp.content)
+        share_url = self.base_url+ '/ocs/v2.php/apps/files_sharing/api/v1/shares'
+        print(share_url,self.attachments_folder+'/'+filename)
+        data = {"shareType": 10, "shareWith": roomtoken, 'path': self.attachments_folder+'/'+filename, 'referenceId': "", 'talkMetaData': {"messageType": "comment"}}
+        resp = self.session.post(share_url, data=data)
+        if resp.status_code !=200:
+            print('share error',resp.status_code,resp.content)
+            return resp.status_code
+        print(resp.content)
+        return resp.status_code
+
     def mark_read_message(self, room_name, id_message):
         data = {"lastReadMessage": id_message}
         resp = self.session.post(self.url + "/v1/chat/" + self.rooms[room_name].token + "/read", data=data)
