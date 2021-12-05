@@ -59,11 +59,12 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         self._session.auth = (username, password)
         self._session.headers.update({'OCS-APIRequest': 'true'})
         self._session.headers.update({'Accept': 'application/json'})
-
+        self.caps = self.session.get(url+"/ocs/v1.php/cloud/capabilities").json()
         """ Get Token/ID for Room """
         prefix = "/ocs/v2.php/apps/spreed/api/"
-        request_rooms = self._session.get(self.url + prefix + "v4/room")
-        if request_rooms.status_code != 200:
+        if 'conversation-v4' in self.caps["ocs"]["data"]["capabilities"]["spreed"]["features"]:
+            request_rooms = self._session.get(self.url + prefix + "v4/room")
+        else:
             request_rooms = self._session.get(self.url + prefix + "v1/room")
         room_json = request_rooms.json()
         rooms = room_json["ocs"]["data"]
