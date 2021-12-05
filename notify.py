@@ -60,7 +60,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         self._session.headers.update({'OCS-APIRequest': 'true'})
         self._session.headers.update({'Accept': 'application/json'})
         """ Get Token/ID for Room """
-        self.caps = self._session.get(url + "/ocs/v1.php/cloud/capabilities").json()
+        self.caps = self.session.get(url + "/ocs/v1.php/cloud/capabilities").json()
         self.attachments_folder = self.caps["ocs"]["data"]["capabilities"]["spreed"]["config"]["attachments"]['folder']
         self.attachments_allowed = self.caps["ocs"]["data"]["capabilities"]["spreed"]["config"]["attachments"][
             'allowed']
