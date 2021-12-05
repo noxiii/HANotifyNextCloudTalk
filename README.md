@@ -100,4 +100,29 @@ mode: single
 ```
 
 ```
+alias: snapshot23
+description: ''
+trigger:
+  - platform: event
+    event_type: nctalk_command
+condition:
+  - condition: template
+    value_template: >-
+      {{ (trigger.event.data.sender=='p2n') and 
+      (trigger.event.data.message.upper() == 'TAKE23')}}
+action:
+  - service: camera.snapshot
+    target:
+      device_id: d7e7044b9e489260fd4e613b0ca3b693
+    data:
+      filename: /config/www/tmp/snapshot23.jpg
+  - service: notify.nextcloudtalk
+    data:
+      message: snapshot23
+      target: p2n
+      data:
+        attachment: /config/www/tmp/snapshot23.jpg
+        attachment_name: snapshot23_{{ context.id }}.jpg
+mode: single
+```
 
