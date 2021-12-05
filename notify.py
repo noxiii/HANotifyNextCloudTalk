@@ -86,8 +86,6 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         """Send a message to NextCloud Talk."""
         # _LOGGER.error(kwargs)
         targets = kwargs["target"]
-        data = kwargs["data"]
-        _LOGGER.warning("At least 1 target is required {%s}",data)
 
         if not targets:
             _LOGGER.error("At least 1 target is required")
@@ -95,4 +93,13 @@ class NextCloudTalkNotificationService(BaseNotificationService):
 
         for target in targets:
             """ Get Token/ID for target room """
-            self.ncclient.send_message(target, message)
+            if "data" in kwargs and "attachment" in kwargs["data"]:
+                if 'attachment_name' in kwargs["data"]:
+                    status = self.ncclient.send_file(target,kwargs["data"]["attachment"], attachment_name=kwargs["data"]['attachment_name'])
+                else:
+                    status = self.ncclient.send_file(target,kwargs["data"]["attachment"])
+                if not(status in (200,201,202,204)):
+                    _LOGGER.error("send attachment error %s, %s", status, kwargs)
+            status = self.ncclient.send_message(target, message)
+            if status != 201:
+                _LOGGER.error("send message error %s", kwargs)

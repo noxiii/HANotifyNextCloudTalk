@@ -30,7 +30,7 @@ notify:
       #url: https://domain.tld/nextcloud
       username: smarthome 
       password: Password
-      pool_interval: 5                  #listen for command optional, disabled if miss or =0
+      pool_interval: 30                 #listen for command optional, disabled if miss or =0
       rooms:                            #listen for command optional
         - "room1"
         - "user1"
@@ -46,7 +46,35 @@ data:
     - user2
     - room2
   message: temp is {{ states.sensor.atc_temperature_2bab3b.state }}°C
+  data:
+    attachment: /config/www/tmp/snapshot22.jpg
+    attachment_name: snapshot22_{{ context.id }}.jpg
 ```  
+```  
+
+alias: snapshot23
+description: ''
+trigger:
+  - platform: time
+    at: '14:00'
+condition: []
+action:
+  - service: camera.snapshot
+    target:
+        device_id: d7e7044b9e489260fd4e613b0ca3b693
+    data:
+        filename: /config/www/tmp/snapshot23.jpg
+  - service: notify.nextcloudtalk
+      data:
+        message: snapshot23
+          target: p2n
+        data:
+            attachment: /config/www/tmp/snapshot23.jpg
+            attachment_name: snapshot23_{{ context.id }}.jpg
+mode: single
+```
+
+
 #### Receiving messages  
 ```
 alias: New automation
@@ -70,3 +98,6 @@ action:
 mode: single
 
 ```
+
+```
+

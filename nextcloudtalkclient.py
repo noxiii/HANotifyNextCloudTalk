@@ -92,10 +92,13 @@ class NextCloudTalkClient(object):
                 print("Unable to post NextCloud Talk message")
         else:
             print("Incorrect status code when posting message: %d", resp.status_code)
-        return None
-    def send_file(self,room_name, path_file):
+        return resp.status_code
+
+    def send_file(self,room_name, path_file, **kwargs):
         roomtoken = self.rooms[room_name].token
         filename = path_file.split('/')[-1:][0]
+        if "attachment_name" in kwargs:
+            filename = kwargs["attachment_name"]
         attachments_url = self.base_url+'/'+self.webdav_root+self.attachments_folder+'/'+filename
         print('attachments_url',attachments_url)
         file = open(path_file,'rb')
