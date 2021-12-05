@@ -60,7 +60,11 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         self._session.headers.update({'OCS-APIRequest': 'true'})
         self._session.headers.update({'Accept': 'application/json'})
         """ Get Token/ID for Room """
-        self.caps = self.session.get(url+"/ocs/v1.php/cloud/capabilities").json()
+        self.caps = self.session.get(url + "/ocs/v1.php/cloud/capabilities").json()
+        self.attachments_folder = self.caps["ocs"]["data"]["capabilities"]["spreed"]["config"]["attachments"]['folder']
+        self.attachments_allowed = self.caps["ocs"]["data"]["capabilities"]["spreed"]["config"]["attachments"][
+            'allowed']
+        self.webdav_root = self.caps["ocs"]["data"]["capabilities"]['core']['webdav-root']
         prefix = "/ocs/v2.php/apps/spreed/api/"
         if 'conversation-v4' in self.caps["ocs"]["data"]["capabilities"]["spreed"]["features"]:
             request_rooms = self._session.get(self.url + prefix + "v4/room")
@@ -80,10 +84,31 @@ class NextCloudTalkNotificationService(BaseNotificationService):
             targets = {self.room}
         if not targets:
             _LOGGER.error("NextCloud Talk message no targets")
+        filename = None
+        if "attachment" in kwargs:
+            path_file = kwargs["attachment"]
+            filename = path_file.split('/')[-1:][0]
+            if "attachment_name" in kwargs:
+                filename = kwargs["attachment_name"]
+            attachments_url = self.url + '/' + self.webdav_root + self.attachments_folder + '/' + filename
+            file = open(path_file, 'rb')
+            share_url = None
+            resp = self.session.put(attachments_url, data=file)
+            if resp.status_code in (200, 201, 202, 204):
+                share_url = self.base_url + '/ocs/v2.php/apps/files_sharing/api/v1/shares/' + filename
+            else:
+                _LOGGER.error("Upload file error for: %s", path_file + '->' + filename)
         for target in targets:
             """ Get Token/ID for target room """
             if target in self.room_tokens:
                 roomtoken = self.room_tokens[target]
+                if not (share_url is None):
+                    data = {"shareType": 10, "shareWith": roomtoken, 'path': self.attachments_folder + '/' + filename,
+                            'referenceId': "", 'talkMetaData': {"messageType": "comment"}}
+                    resp = self.session.post(share_url, data=data)
+                    if resp.status_code != 200:
+                        _LOGGER.error("Share file error for: %s", path_file + '->' + filename)
+
                 data = {"token": roomtoken, "message": message, "actorType": "",
                         "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
                 prefix = "/ocs/v2.php/apps/spreed/api/v1"
