@@ -4,14 +4,8 @@ import voluptuous as vol
 import requests
 import json
 
-from .nextcloudtalkclient import NextCloudTalkClient
-
-CONF_ROOMS = "rooms"
-CONF_POOL_INTERVAL = "pool_interval"
-
-# CONF_ROOM,
 from homeassistant.const import (
-    CONF_PASSWORD, CONF_URL, CONF_USERNAME)
+    CONF_PASSWORD, CONF_ROOM, CONF_URL, CONF_USERNAME)
 import homeassistant.helpers.config_validation as cv
 
 from homeassistant.components.notify import (ATTR_DATA, PLATFORM_SCHEMA,
@@ -38,8 +32,11 @@ def get_service(hass, config, discovery_info=None):
     password = config.get(CONF_PASSWORD)
     pool_interval = config.get(CONF_POOL_INTERVAL)
 
-    url = config.get(CONF_URL)
-    rooms = config.get(CONF_ROOMS)
+    try:
+        return NextCloudTalkNotificationService(url, username, password, room)
+    except RocketConnectionException:
+        _LOGGER.warning(
+            "Unable to connect to Rocket.Chat server at %s", url)
 
     return NextCloudTalkNotificationService(hass, url, username, password, rooms, pool_interval)
 
@@ -53,11 +50,22 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         """Initialize the service."""
         self.hass = hass
         self.url = url
-        self.room = room
-        self._session = requests.Session()
-        self._session.auth = (username, password)
-        self._session.headers.update({'OCS-APIRequest': 'true'})
-        self._session.headers.update({'Accept': 'application/json'})
+        self.rooms = rooms
+        self.pool_interval = pool_interval
+        self.ncclient = NextCloudTalkClient(base_url=url,
+                                            username=username, password=password)
+        self.ncclient.handler = self.handler
+        # _LOGGER.warning("nextcloud joining...")
+        for room in rooms:
+            # _LOGGER.warning("nextcloud join:"+room)
+            self.ncclient.joinRoom(room)
+        if not (pool_interval is None) and not (rooms is None) and (pool_interval > 0) and len(rooms) > 0:
+            self.ncclient.should_listen = True
+            self.ncclient.start_listener_thread()
+            _LOGGER.warning("pooling enabled by config (pool_interval="+str(pool_interval)+" rooms="+str(len(rooms)))
+        else:
+            _LOGGER.warning("pooling disabled by config (pool_interval=0 or empty rooms)")
+
 
     def handler(self, room, sender, sender_name, message):
         ACCEPT = True
