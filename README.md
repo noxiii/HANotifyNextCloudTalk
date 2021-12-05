@@ -67,7 +67,7 @@ action:
   - service: notify.nextcloudtalk
       data:
         message: snapshot23
-          target: p2n
+          target: user1
         data:
             attachment: /config/www/tmp/snapshot23.jpg
             attachment_name: snapshot23_{{ context.id }}.jpg
@@ -108,7 +108,7 @@ trigger:
 condition:
   - condition: template
     value_template: >-
-      {{ (trigger.event.data.sender=='p2n') and 
+      {{ (trigger.event.data.sender=='user1') and 
       (trigger.event.data.message.upper() == 'TAKE23')}}
 action:
   - service: camera.snapshot
@@ -119,7 +119,7 @@ action:
   - service: notify.nextcloudtalk
     data:
       message: snapshot23
-      target: p2n
+      target: user1
       data:
         attachment: /config/www/tmp/snapshot23.jpg
         attachment_name: snapshot23_{{ context.id }}.jpg
