@@ -91,7 +91,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
             _LOGGER.error("At least 1 target is required")
             return
         uploaded = {}
-        if "data" in kwargs:# and "attachment" in kwargs["data"]:
+        if kwargs["data"]:# and "attachment" in kwargs["data"]:
             for attach in kwargs['data']:
                 status = self.ncclient.upload_file(attach,kwargs['data'][attach])
                 if status in (200,201,202,204):
