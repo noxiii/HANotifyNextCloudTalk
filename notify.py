@@ -86,7 +86,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         """Send a message to NextCloud Talk."""
         # _LOGGER.error(kwargs)
         targets = kwargs["target"]
-        _LOGGER.error("kwargs is: %s",kwargs)
+        #_LOGGER.error("kwargs is: %s",kwargs)
         if not targets:
             _LOGGER.error("At least 1 target is required")
             return
