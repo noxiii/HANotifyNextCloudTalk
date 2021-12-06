@@ -47,8 +47,7 @@ data:
     - room2
   message: temp is {{ states.sensor.atc_temperature_2bab3b.state }}°C
   data:
-    attachment: /config/www/tmp/snapshot22.jpg
-    attachment_name: snapshot22_{{ context.id }}.jpg
+    snapshot22_{{ context.id }}.jpg: /config/www/tmp/snapshot22.jpg
 ```  
 ```  
 
@@ -69,8 +68,7 @@ action:
         message: snapshot23
           target: user1
         data:
-            attachment: /config/www/tmp/snapshot23.jpg
-            attachment_name: snapshot23_{{ context.id }}.jpg
+            snapshot23_{{ context.id }}.jpg: /config/www/tmp/snapshot23.jpg
 mode: single
 ```
 
@@ -116,13 +114,18 @@ action:
       device_id: d7e7044b9e489260fd4e613b0ca3b693
     data:
       filename: /config/www/tmp/snapshot23.jpg
+  - service: camera.snapshot
+    target:
+      device_id: c7e7044b9e489260fd4e613b0ca3b694
+    data:
+      filename: /config/www/tmp/snapshot24.jpg
   - service: notify.nextcloudtalk
     data:
       message: snapshot23
       target: user1
       data:
-        attachment: /config/www/tmp/snapshot23.jpg
-        attachment_name: snapshot23_{{ context.id }}.jpg
+        snapshot23_{{ context.id }}.jpg: /config/www/tmp/snapshot23.jpg
+        snapshot24_{{ context.id }}.jpg: /config/www/tmp/snapshot24.jpg
 mode: single
 ```
 

@@ -94,27 +94,31 @@ class NextCloudTalkClient(object):
             print("Incorrect status code when posting message: %d", resp.status_code)
         return resp.status_code
 
-    def send_file(self,room_name, path_file, **kwargs):
-        roomtoken = self.rooms[room_name].token
-        filename = path_file.split('/')[-1:][0]
-        if "attachment_name" in kwargs:
-            filename = kwargs["attachment_name"]
-        attachments_url = self.base_url+'/'+self.webdav_root+self.attachments_folder+'/'+filename
-        print('attachments_url',attachments_url)
-        file = open(path_file,'rb')
+    def upload_file(self,file_name, file_path):
+        #
+        #        filename = path_file.split('/')[-1:][0]
+        #        if "attachment_name" in kwargs:
+        #            filename = kwargs["attachment_name"]
+        attachments_url = self.base_url+'/'+self.webdav_root+self.attachments_folder+'/'+file_name
+        #print('attachments_url',attachments_url)
+        file = open(file_path,'rb')
         resp = self.session.put(attachments_url, data=file)
         if not(resp.status_code in (200,201,202,204)):
-            print('upload error',resp.status_code,resp.content)
+            #print('upload error',resp.status_code,resp.content)
             return resp.status_code
-        print(resp.content)
+        #print(resp.content)
+        return resp.status_code
+
+    def send_file(self,room_name, file_name):
+        roomtoken = self.rooms[room_name].token
         share_url = self.base_url+ '/ocs/v2.php/apps/files_sharing/api/v1/shares'
-        print(share_url,self.attachments_folder+'/'+filename)
-        data = {"shareType": 10, "shareWith": roomtoken, 'path': self.attachments_folder+'/'+filename, 'referenceId': "", 'talkMetaData': {"messageType": "comment"}}
+        #print(share_url,self.attachments_folder+'/'+filename)
+        data = {"shareType": 10, "shareWith": roomtoken, 'path': self.attachments_folder+'/'+file_name, 'referenceId': "", 'talkMetaData': {"messageType": "comment"}}
         resp = self.session.post(share_url, data=data)
         if resp.status_code !=200:
-            print('share error',resp.status_code,resp.content)
+            #print('share error',resp.status_code,resp.content)
             return resp.status_code
-        print(resp.content)
+        #print(resp.content)
         return resp.status_code
 
     def mark_read_message(self, room_name, id_message):
