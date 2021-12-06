@@ -97,7 +97,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
                 if status in (200,201,202,204):
                     uploaded[attach] = kwargs['data'][attach]
                 else:
-                    _LOGGER.error("upload attachment error %s, %s, %s", status, attach, kwargs[data][attach])
+                    _LOGGER.error("upload attachment error %s, %s, %s", status, attach, kwargs["data"][attach])
         for target in targets:
             """ Get Token/ID for target room """
             for uploaded_file in uploaded:
