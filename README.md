@@ -41,6 +41,13 @@ notify:
 ```
 service: notify.nextcloudtalk
 data:
+  target: user1
+  message: temp is {{ states.sensor.atc_temperature_2bab3b.state }}°C
+```  
+
+```
+service: notify.nextcloudtalk
+data:
   target: #required
     - user1
     - user2
