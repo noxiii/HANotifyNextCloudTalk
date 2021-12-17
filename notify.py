@@ -83,42 +83,41 @@ class NextCloudTalkNotificationService(BaseNotificationService):
             targets = {self.room}
         if not targets:
             _LOGGER.error("NextCloud Talk message no targets")
-        filename = None
-        if "attachment" in kwargs:
-            path_file = kwargs["attachment"]
-            filename = path_file.split('/')[-1:][0]
-            if "attachment_name" in kwargs:
-                filename = kwargs["attachment_name"]
-            attachments_url = self.url + '/' + self.webdav_root + self.attachments_folder + '/' + filename
-            file = open(path_file, 'rb')
-            share_url = None
-            resp = self.session.put(attachments_url, data=file)
-            if resp.status_code in (200, 201, 202, 204):
-                share_url = self.base_url + '/ocs/v2.php/apps/files_sharing/api/v1/shares/' + filename
-            else:
-                _LOGGER.error("Upload file error for: %s", path_file + '->' + filename)
-        for target in targets:
-            """ Get Token/ID for target room """
-            if target in self.room_tokens:
-                roomtoken = self.room_tokens[target]
-                if not (share_url is None):
-                    data = {"shareType": 10, "shareWith": roomtoken, 'path': self.attachments_folder + '/' + filename,
-                            'referenceId': "", 'talkMetaData': {"messageType": "comment"}}
-                    resp = self.session.post(share_url, data=data)
-                    if resp.status_code != 200:
-                        _LOGGER.error("Share file error for: %s", path_file + '->' + filename)
+        else:
+            uploaded = {}
+            data = kwargs.get["data"]
+            if data:
+                for attach in data:
+                    file = open(data[attach], 'rb')
+                    resp = self.session.put(self.url + '/' + self.webdav_root + self.attachments_folder + '/' + attach,
+                                            data=file)
+                    if resp.status_code in (200, 201, 202, 204):
+                        uploaded[attach] = data[attach]
+                    else:
+                        _LOGGER.error("upload attachment error %s, %s, %s", resp.status_code, attach,
+                                      data[attach])
+            for target in targets:
+                """ Get Token/ID for target room """
+                if target in self.room_tokens:
+                    roomtoken = self.room_tokens[target]
+                    for uploaded_file in uploaded:
+                        data = {"shareType": 10, "shareWith": roomtoken,
+                                'path': self.attachments_folder + '/' + uploaded_file, 'referenceId': "",
+                                'talkMetaData': {"messageType": "comment"}}
+                        share_url = self.base_url + '/ocs/v2.php/apps/files_sharing/api/v1/shares/' + uploaded_file
+                        resp = self.session.post(share_url, data=data)
+                        if resp.status_code != 200:
+                            _LOGGER.error("Share file %s error for %s", uploaded_file, target)
 
-                data = {"token": roomtoken, "message": message, "actorType": "",
-                        "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
-                prefix = "/ocs/v2.php/apps/spreed/api/v1"
-                resp = self._session.post(
-                    self.url + prefix + "/chat/" + roomtoken, data=data)
-                if resp.status_code == 201:
-                    success = resp.json()["ocs"]["meta"]["status"]
-                    if not success:
-                        _LOGGER.error("Unable to post NextCloud Talk message")
+                    data = {"token": roomtoken, "message": message, "actorType": "",
+                            "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
+                    prefix = "/ocs/v2.php/apps/spreed/api/v1"
+                    resp = self._session.post(self.url + prefix + "/chat/" + roomtoken, data=data)
+                    if resp.status_code == 201:
+                        success = resp.json()["ocs"]["meta"]["status"]
+                        if not success:
+                            _LOGGER.error("Unable to post NextCloud Talk message")
+                        else:
+                            _LOGGER.error("Incorrect status code when posting message: %d", resp.status_code)
                 else:
-                    _LOGGER.error("Incorrect status code when posting message: %d",
-                                  resp.status_code)
-            else:
-                _LOGGER.error("Unable to post NextCloud Talk message: no token for: %s", target)
+                    _LOGGER.error("Unable to post NextCloud Talk message: no token for: %s", target)
