@@ -70,12 +70,11 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         rooms = room_json["ocs"]["data"]
         self.room_tokens = {}
         for roomInfo in rooms:
-            if roomInfo["name"] == self.room:
-                self.room_tokens[roomInfo["name"]] = roomInfo["token"]
+            self.room_tokens[roomInfo["name"]] = roomInfo["token"]
 
     def send_message(self, message="", **kwargs):
         """Send a message to NextCloud Talk."""
-        targets = kwargs["target"]
+        targets = kwargs.get["target"]
         if not targets and not (self.room is None):
             targets = {self.room}
         if not targets:
