@@ -117,7 +117,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
                         success = resp.json()["ocs"]["meta"]["status"]
                         if not success:
                             _LOGGER.error("Unable to post NextCloud Talk message")
-                        else:
-                            _LOGGER.error("Incorrect status code when posting message: %d", resp.status_code)
+                    else:
+                        _LOGGER.error("Incorrect status code when posting message: %d", resp.status_code)
                 else:
                     _LOGGER.error("Unable to post NextCloud Talk message: no token for: %s", target)
