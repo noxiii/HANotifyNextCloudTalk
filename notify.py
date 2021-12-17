@@ -19,7 +19,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_URL): vol.Url(),
     vol.Required(CONF_USERNAME): cv.string,
     vol.Required(CONF_PASSWORD): cv.string,
-    vol.Required(CONF_ROOM): cv.string,
+    vol.Optional(CONF_ROOM): cv.string,
 })
 
 
@@ -59,30 +59,41 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         self._session.auth = (username, password)
         self._session.headers.update({'OCS-APIRequest': 'true'})
         self._session.headers.update({'Accept': 'application/json'})
-
         """ Get Token/ID for Room """
+        self.caps = self._session.get(url+"/ocs/v1.php/cloud/capabilities").json()
         prefix = "/ocs/v2.php/apps/spreed/api/"
-        request_rooms = self._session.get(self.url+prefix+"v4/room")
-        if request_rooms.status_code != 200:
-            request_rooms = self._session.get(self.url+prefix+"v1/room")
+        if 'conversation-v4' in self.caps["ocs"]["data"]["capabilities"]["spreed"]["features"]:
+            request_rooms = self._session.get(self.url + prefix + "v4/room")
+        else:
+            request_rooms = self._session.get(self.url + prefix + "v1/room")
         room_json = request_rooms.json()
         rooms = room_json["ocs"]["data"]
+        self.room_tokens = {}
         for roomInfo in rooms:
-            if roomInfo["name"] == self.room:
-                self.roomtoken = roomInfo["token"]
+            self.room_tokens[roomInfo["name"]] = roomInfo["token"]
 
     def send_message(self, message="", **kwargs):
         """Send a message to NextCloud Talk."""
-        data = {"token": self.roomtoken, "message": message, "actorType": "",
-                "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
-        prefix = "/ocs/v2.php/apps/spreed/api/v1"
-        resp = self._session.post(
-            self.url + prefix + "/chat/" + self.roomtoken, data=data)
-        print(resp.text)
-        if resp.status_code == 201:
-            success = resp.json()["ocs"]["meta"]["status"]
-            if not success:
-                _LOGGER.error("Unable to post NextCloud Talk message")
-        else:
-            _LOGGER.error("Incorrect status code when posting message: %d",
-                          resp.status_code)
+        targets = kwargs.get["target"]
+        if not targets and not (self.room is None):
+            targets = {self.room}
+        if not targets:
+            _LOGGER.error("NextCloud Talk message no targets")
+        for target in targets:
+            """ Get Token/ID for target room """
+            if target in self.room_tokens:
+                roomtoken = self.room_tokens[target]
+                data = {"token": roomtoken, "message": message, "actorType": "",
+                        "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
+                prefix = "/ocs/v2.php/apps/spreed/api/v1"
+                resp = self._session.post(
+                    self.url + prefix + "/chat/" + roomtoken, data=data)
+                if resp.status_code == 201:
+                    success = resp.json()["ocs"]["meta"]["status"]
+                    if not success:
+                        _LOGGER.error("Unable to post NextCloud Talk message")
+                else:
+                    _LOGGER.error("Incorrect status code when posting message: %d",
+                                  resp.status_code)
+            else:
+                _LOGGER.error("Unable to post NextCloud Talk message: no token for: %s", target)
