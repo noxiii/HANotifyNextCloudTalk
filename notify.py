@@ -74,7 +74,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
 
     def send_message(self, message="", **kwargs):
         """Send a message to NextCloud Talk."""
-        targets = kwargs.get["target"]
+        targets = kwargs.get("target")
         if not targets and not (self.room is None):
             targets = {self.room}
         if not targets:
