@@ -38,4 +38,4 @@ jobs:
         pip install isort
     - name: Analysing the code with isort
       run: |
-        isort --all-files --show-diff-on-failu
+        isort *.py --diff
