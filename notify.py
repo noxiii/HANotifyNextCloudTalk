@@ -1,16 +1,13 @@
 """NextCloud Talk notification service."""
 import logging
-import voluptuous as vol
-import requests
-import json
 
-from homeassistant.const import (
-    CONF_PASSWORD, CONF_ROOM, CONF_URL, CONF_USERNAME)
 import homeassistant.helpers.config_validation as cv
-
-from homeassistant.components.notify import (ATTR_DATA, PLATFORM_SCHEMA,
+import requests
+import voluptuous as vol
+from homeassistant.components.notify import (PLATFORM_SCHEMA,
                                              BaseNotificationService)
-from .const import DOMAIN
+from homeassistant.const import (CONF_PASSWORD, CONF_ROOM, CONF_URL,
+                                 CONF_USERNAME)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,14 +33,19 @@ def get_service(hass, config, discovery_info=None):
 
     try:
         return NextCloudTalkNotificationService(url, username, password, room)
+
+    # disabled nextcloud api not used => reimplement
     # except NextcloudConnectionException:
     #    _LOGGER.warning(
     #        "Unable to connect to Nextcloud Talk server at %s", url)
-
-    except NextcloudAuthenticationException:
+    #
+    # except NextcloudAuthenticationException:
+    #    _LOGGER.warning(
+    #        "Nextcloud authentication failed for user %s", username)
+    #    _LOGGER.info("Please check your username/password")
+    except:
         _LOGGER.warning(
             "Nextcloud authentication failed for user %s", username)
-        _LOGGER.info("Please check your username/password")
 
     return None
 
