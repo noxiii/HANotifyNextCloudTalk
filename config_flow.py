@@ -22,7 +22,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Required("url"): str,
         vol.Required("username"): str,
         vol.Required("password"): str,
-        vol.Required("room"): str,
+        vol.Optional("room"): str,
     }
 )
 
