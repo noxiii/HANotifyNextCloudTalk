@@ -3,7 +3,7 @@ name: Pylint
 on: [push]
 
 jobs:
-  pylint:
+  flake8:
     runs-on: ubuntu-latest
     strategy:
       matrix:
