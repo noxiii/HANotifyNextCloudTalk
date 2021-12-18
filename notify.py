@@ -33,14 +33,19 @@ def get_service(hass, config, discovery_info=None):
 
     try:
         return NextCloudTalkNotificationService(url, username, password, room)
+
+    # disabled nextcloud api not used => reimplement
     # except NextcloudConnectionException:
     #    _LOGGER.warning(
     #        "Unable to connect to Nextcloud Talk server at %s", url)
-
-    #except NextcloudAuthenticationException:
+    #
+    # except NextcloudAuthenticationException:
     #    _LOGGER.warning(
     #        "Nextcloud authentication failed for user %s", username)
     #    _LOGGER.info("Please check your username/password")
+    except:
+        _LOGGER.warning(
+            "Nextcloud authentication failed for user %s", username)
 
     return None
 
