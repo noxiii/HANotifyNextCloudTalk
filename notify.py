@@ -1,6 +1,6 @@
 """NextCloud Talk notification service."""
-import logging
 import json
+import logging
 
 import homeassistant.helpers.config_validation as cv
 import requests
