@@ -60,7 +60,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         self._session.headers.update({'OCS-APIRequest': 'true'})
         self._session.headers.update({'Accept': 'application/json'})
         """ Get Token/ID for Room """
-        self.caps = self.session.get(url + "/ocs/v1.php/cloud/capabilities").json()
+        self.caps = self._session.get(url + "/ocs/v1.php/cloud/capabilities").json()
         self.attachments_folder = self.caps["ocs"]["data"]["capabilities"]["spreed"]["config"]["attachments"]['folder']
         self.attachments_allowed = self.caps["ocs"]["data"]["capabilities"]["spreed"]["config"]["attachments"][
             'allowed']
@@ -85,12 +85,12 @@ class NextCloudTalkNotificationService(BaseNotificationService):
             _LOGGER.error("NextCloud Talk message no targets")
         else:
             uploaded = {}
-            data = kwargs.get["data"]
+            data = kwargs.get("data")
             if data:
                 for attach in data:
                     file = open(data[attach], 'rb')
-                    resp = self.session.put(self.url + '/' + self.webdav_root + self.attachments_folder + '/' + attach,
-                                            data=file)
+                    resp = self._session.put(self.url + '/' + self.webdav_root + self.attachments_folder + '/' + attach,
+                                             data=file)
                     if resp.status_code in (200, 201, 202, 204):
                         uploaded[attach] = data[attach]
                     else:
@@ -104,10 +104,10 @@ class NextCloudTalkNotificationService(BaseNotificationService):
                         data = {"shareType": 10, "shareWith": roomtoken,
                                 'path': self.attachments_folder + '/' + uploaded_file, 'referenceId': "",
                                 'talkMetaData': {"messageType": "comment"}}
-                        share_url = self.base_url + '/ocs/v2.php/apps/files_sharing/api/v1/shares/' + uploaded_file
-                        resp = self.session.post(share_url, data=data)
+                        share_url = self.url + '/ocs/v2.php/apps/files_sharing/api/v1/shares'
+                        resp = self._session.post(share_url, data=data)
                         if resp.status_code != 200:
-                            _LOGGER.error("Share file %s error for %s", uploaded_file, target)
+                            _LOGGER.error("Share file %s error for %s, %s, %s, %s", uploaded_file, target, share_url, resp, data)
 
                     data = {"token": roomtoken, "message": message, "actorType": "",
                             "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
