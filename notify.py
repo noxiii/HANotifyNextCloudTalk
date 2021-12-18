@@ -1,15 +1,15 @@
 """NextCloud Talk notification service."""
-import logging
-import voluptuous as vol
-import requests
 import json
+import logging
 
-from homeassistant.const import (
-    CONF_PASSWORD, CONF_ROOM, CONF_URL, CONF_USERNAME)
 import homeassistant.helpers.config_validation as cv
-
+import requests
+import voluptuous as vol
 from homeassistant.components.notify import (ATTR_DATA, PLATFORM_SCHEMA,
                                              BaseNotificationService)
+from homeassistant.const import (CONF_PASSWORD, CONF_ROOM, CONF_URL,
+                                 CONF_USERNAME)
+
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
