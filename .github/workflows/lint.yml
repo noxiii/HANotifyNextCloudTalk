@@ -7,6 +7,11 @@ on:
       - master
   pull_request: ~
 
+env:
+  CACHE_VERSION: 4
+  DEFAULT_PYTHON: 3.8
+  PRE_COMMIT_CACHE: ~/.cache/pre-commit
+
 jobs:
   lint-flake8:
     name: Check flake8
