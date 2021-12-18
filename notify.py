@@ -38,10 +38,10 @@ def get_service(hass, config, discovery_info=None):
     #    _LOGGER.warning(
     #        "Unable to connect to Nextcloud Talk server at %s", url)
 
-    except NextcloudAuthenticationException:
-        _LOGGER.warning(
-            "Nextcloud authentication failed for user %s", username)
-        _LOGGER.info("Please check your username/password")
+    #except NextcloudAuthenticationException:
+    #    _LOGGER.warning(
+    #        "Nextcloud authentication failed for user %s", username)
+    #    _LOGGER.info("Please check your username/password")
 
     return None
 
