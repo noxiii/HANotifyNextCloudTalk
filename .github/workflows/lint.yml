@@ -11,9 +11,6 @@ jobs:
   lint-flake8:
     name: Check flake8
     runs-on: ubuntu-latest
-    needs:
-      - changes
-      - prepare-base
     steps:
       - name: Check out code from GitHub
         uses: actions/checkout@v2.4.0
@@ -63,7 +60,6 @@ jobs:
   lint-isort:
     name: Check isort
     runs-on: ubuntu-latest
-    needs: prepare-base
     steps:
       - name: Check out code from GitHub
         uses: actions/checkout@v2.4.0
