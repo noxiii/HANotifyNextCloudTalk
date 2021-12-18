@@ -10,8 +10,6 @@ from homeassistant.components.notify import (ATTR_DATA, PLATFORM_SCHEMA,
 from homeassistant.const import (CONF_PASSWORD, CONF_ROOM, CONF_URL,
                                  CONF_USERNAME)
 
-from .const import DOMAIN
-
 _LOGGER = logging.getLogger(__name__)
 
 # pylint: disable=no-value-for-parameter
