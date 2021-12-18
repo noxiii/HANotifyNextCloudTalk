@@ -31,3 +31,17 @@ notify:
       room: smarthome
 
 ```
+
+Add the notify component to your Automation
+```
+service: notify.nextcloudtalk
+data:
+  message: File example
+  target:
+    - user
+    - group
+  data:
+    file.txt: /config/www/file.txt
+    file_{{ context.id }}.txt: /config/www/file.txt
+```
+
