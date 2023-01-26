@@ -8,11 +8,11 @@ nextcloudtalkclient based on ha-matrix-client
 
 notify based on noxiii/HANotifyNextCloudTalk
 
-Tested with Home Assistant 2021.12.1, NextCloud 22.2.3 and Talk 12.1.2
+Tested with Home Assistant 2023.1.7, NextCloud 25.0.3 and Talk 15.0.3
 
 ### Installing
 
-Clone the Repository into ./custom_component/ in the HomeAssistent config directory beside the configuration.yaml
+Clone the Repository into ./custom_components/ in the HomeAssistent config directory beside the configuration.yaml
 Then restart HomeAssistant to load the custom component.
 
 ### Configuration
