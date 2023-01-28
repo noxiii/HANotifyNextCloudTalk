@@ -54,7 +54,6 @@ class NextCloudTalkClient(object):
             self.getRoomsInfo()
 
     def getRoomsInfo(self):
-        self.rooms = {}
         try:
             request_rooms = self.session.get(self.url + "/"+self.api_version+"/room")
             room_json = request_rooms.json()
