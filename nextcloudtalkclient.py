@@ -54,33 +54,35 @@ class NextCloudTalkClient(object):
             self.getRoomsInfo()
 
     def getRoomsInfo(self):
-
-        request_rooms = self.session.get(self.url + "/"+self.api_version+"/room")
-        room_json = request_rooms.json()
-        server_rooms = room_json["ocs"]["data"]
-        for roomInfo in server_rooms:
-            if not (roomInfo["name"] in self.rooms.keys()):
-                self.rooms[roomInfo["name"]] = Room()
-                self.rooms[roomInfo["name"]].token = roomInfo["token"]
-        for client_room_name in self.rooms.keys():
-            client_room = self.rooms[client_room_name]
-            server_room = None
+        self.rooms = {}
+        try:
+            request_rooms = self.session.get(self.url + "/"+self.api_version+"/room")
+            room_json = request_rooms.json()
+            server_rooms = room_json["ocs"]["data"]
             for roomInfo in server_rooms:
-                if roomInfo["name"] == client_room_name:
-                    server_room = roomInfo
-            if server_room == None:                # create conversation for user
-                data = {"roomType": 1, "invite": client_room_name, "roomName": client_room_name}
-                resp = self.session.post(self.url + "/"+self.api_version+"/room", data=data)
-                resp_json = resp.json()
-                created_rooms = resp_json["ocs"]["data"]
-                for roomInfo in created_rooms:
+                if not (roomInfo["name"] in self.rooms.keys()):
+                    self.rooms[roomInfo["name"]] = Room()
+                    self.rooms[roomInfo["name"]].token = roomInfo["token"]
+            for client_room_name in self.rooms.keys():
+                client_room = self.rooms[client_room_name]
+                server_room = None
+                for roomInfo in server_rooms:
                     if roomInfo["name"] == client_room_name:
                         server_room = roomInfo
-            if not (server_room == None):
-                client_room.token = server_room["token"]
-                client_room.lastreadmessage = server_room["lastReadMessage"]
-                client_room.unreadmessages = server_room["unreadMessages"]
-
+                if server_room == None:                # create conversation for user
+                    data = {"roomType": 1, "invite": client_room_name, "roomName": client_room_name}
+                    resp = self.session.post(self.url + "/"+self.api_version+"/room", data=data)
+                    resp_json = resp.json()
+                    created_rooms = resp_json["ocs"]["data"]
+                    for roomInfo in created_rooms:
+                        if roomInfo["name"] == client_room_name:
+                            server_room = roomInfo
+                if not (server_room == None):
+                    client_room.token = server_room["token"]
+                    client_room.lastreadmessage = server_room["lastReadMessage"]
+                    client_room.unreadmessages = server_room["unreadMessages"]
+        except Exception as e:
+            print(e)
     def send_message(self, room_name, message="", **kwargs):
         roomtoken = self.rooms[room_name].token
         data = {"token": roomtoken, "message": message, "actorType": "", "actorId": "", "actorDisplayName": "",
@@ -135,7 +137,7 @@ class NextCloudTalkClient(object):
         self.session.headers.update({"X-Chat-Last-Given": str(room.lastreadmessage)})
         resp = self.session.get(self.url + "/v1/chat/" + room.token + "?lookIntoFuture=1&setReadMarker=0&limit=" + str(
             room.unreadmessages) + "&lastKnownMessageId=" + str(room.lastreadmessage))
-        messages = ""
+        messages = {}
         if resp.status_code == 200:
             messages = resp.json()["ocs"]["data"]
         if resp.status_code == 304:
