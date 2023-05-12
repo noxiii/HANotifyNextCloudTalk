@@ -8,7 +8,7 @@ nextcloudtalkclient based on ha-matrix-client
 
 notify based on noxiii/HANotifyNextCloudTalk
 
-Tested with Home Assistant 2023.1.7, NextCloud 25.0.3 and Talk 15.0.3
+Tested with Home Assistant 2023.5.2, NextCloud 25.0.5 and Talk 15.0.5
 
 ### Installing
 
