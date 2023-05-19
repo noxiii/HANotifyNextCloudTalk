@@ -7,7 +7,7 @@ import json
 from .nextcloudtalkclient import NextCloudTalkClient
 
 CONF_ROOMS = "rooms"
-CONF_POOL_INTERVAL = "pool_interval"
+CONF_PULL_INTERVAL = "pull_interval"
 
 # CONF_ROOM,
 from homeassistant.const import (
@@ -25,7 +25,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_USERNAME): cv.string,
     vol.Required(CONF_PASSWORD): cv.string,
     vol.Optional(CONF_ROOMS, default=[]): vol.All(cv.ensure_list, [cv.string]),
-    vol.Optional(CONF_POOL_INTERVAL, default=0): vol.Range(
+    vol.Optional(CONF_PULL_INTERVAL, default=0): vol.Range(
         min=0, max=600
     ),
 }
@@ -36,12 +36,12 @@ def get_service(hass, config, discovery_info=None):
     """Return the notify service."""
     username = config.get(CONF_USERNAME)
     password = config.get(CONF_PASSWORD)
-    pool_interval = config.get(CONF_POOL_INTERVAL)
+    pull_interval = config.get(CONF_PULL_INTERVAL)
 
     url = config.get(CONF_URL)
     rooms = config.get(CONF_ROOMS)
 
-    return NextCloudTalkNotificationService(hass, url, username, password, rooms, pool_interval)
+    return NextCloudTalkNotificationService(hass, url, username, password, rooms, pull_interval)
 
 
 class NextCloudTalkNotificationService(BaseNotificationService):
@@ -49,12 +49,12 @@ class NextCloudTalkNotificationService(BaseNotificationService):
     EVENT_NCTALK_COMMAND = "nctalk_command"
     ncclient = None
 
-    def __init__(self, hass, url, username, password, rooms, pool_interval):
+    def __init__(self, hass, url, username, password, rooms, pull_interval):
         """Initialize the service."""
         self.hass = hass
         self.url = url
         self.rooms = rooms
-        self.pool_interval = pool_interval
+        self.pull_interval = pull_interval
         self.ncclient = NextCloudTalkClient(base_url=url,
                                             username=username, password=password)
         self.ncclient.handler = self.handler
@@ -62,12 +62,12 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         for room in rooms:
             # _LOGGER.warning("nextcloud join:"+room)
             self.ncclient.joinRoom(room)
-        if not (pool_interval is None) and not (rooms is None) and (pool_interval > 0) and len(rooms) > 0:
+        if not (pull_interval is None) and not (rooms is None) and (pull_interval > 0) and len(rooms) > 0:
             self.ncclient.should_listen = True
             self.ncclient.start_listener_thread()
-            _LOGGER.warning("pooling enabled by config (pool_interval="+str(pool_interval)+" rooms="+str(len(rooms)))
+            _LOGGER.warning("pulling enabled by config (pull_interval="+str(pull_interval)+" rooms="+str(len(rooms)))
         else:
-            _LOGGER.warning("pooling disabled by config (pool_interval=0 or empty rooms)")
+            _LOGGER.warning("pulling disabled by config (pull_interval=0 or empty rooms)")
 
 
     def handler(self, room, sender, sender_name, message):

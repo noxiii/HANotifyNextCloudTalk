@@ -29,8 +29,8 @@ notify:
       url: https://nextcloud.domain.tld
       #url: https://domain.tld/nextcloud
       username: smarthome 
-      password: Password
-      pool_interval: 30                 #listen for command optional, disabled if miss or =0
+      password: User|Application Password 
+      pull_interval: 30                 #listen for command optional, disabled if miss or =0
       rooms:                            #listen for command optional
         - "room1"
         - "user1"

@@ -12,7 +12,7 @@ class Room(object):
 
 
 class NextCloudTalkClient(object):
-    pool_interval = 5 # pool interval
+    pull_interval = 5 # pull interval
     api_version = 'v4'
 
     def __init__(self, base_url, username, password):
@@ -162,7 +162,7 @@ class NextCloudTalkClient(object):
         while (self.should_listen):
             try:
                 self._sync(timeout_ms)
-                time.sleep(self.pool_interval)
+                time.sleep(self.pull_interval)
                 _bad_sync_timeout = bad_sync_timeout
             except Exception as e:
                 if exception_handler is not None:
