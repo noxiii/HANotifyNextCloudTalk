@@ -19,11 +19,11 @@ class NextcloudClient:
             f"{url}/ocs/v1.php/cloud/capabilities").json()
 
         self.attachments_folder = self.caps["ocs"]["data"]["capabilities"][
-            "spreed"]["spreed"]["config"]["attachments"]["folder"]
+            "spreed"]["config"]["attachments"]["folder"]
         self.attachments_allowed = self.caps["ocs"]["data"]["capabilities"][
-            "spreed"]["spreed"]["config"]["attachments"]["allowed"]
+            "spreed"]["config"]["attachments"]["allowed"]
         self.webdav_root = self.caps["ocs"]["data"]["capabilities"][
-            "spreed"]["core"]["webdav-root"]
+            "core"]["webdav-root"]
 
         self.prefix = "/ocs/v2.php/apps/spreed/api/"
 
