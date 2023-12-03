@@ -2,12 +2,13 @@
 import logging
 
 import homeassistant.helpers.config_validation as cv
-import requests
 import voluptuous as vol
 from homeassistant.components.notify import (PLATFORM_SCHEMA,
                                              BaseNotificationService)
 from homeassistant.const import (CONF_PASSWORD, CONF_ROOM, CONF_URL,
                                  CONF_USERNAME)
+
+from .nextcloudclient import NextcloudClient
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,18 +35,10 @@ def get_service(hass, config, discovery_info=None):
     try:
         return NextCloudTalkNotificationService(url, username, password, room)
 
-    # disabled nextcloud api not used => reimplement
-    # except NextcloudConnectionException:
-    #    _LOGGER.warning(
-    #        "Unable to connect to Nextcloud Talk server at %s", url)
-    #
-    # except NextcloudAuthenticationException:
-    #    _LOGGER.warning(
-    #        "Nextcloud authentication failed for user %s", username)
-    #    _LOGGER.info("Please check your username/password")
-    except:
+    except Exception as e:
         _LOGGER.warning(
-            "Nextcloud authentication failed for user %s", username)
+            f"Nextcloud authentication failed for user {username}. "
+            f"Except: {e}")
 
     return None
 
@@ -55,33 +48,13 @@ class NextCloudTalkNotificationService(BaseNotificationService):
 
     def __init__(self, url, username, password, room):
         """Initialize the service."""
-        self.url = url
+        self.client = NextcloudClient(url, username, password)
         self.room = room
-        self._session = requests.Session()
-        self._session.auth = (username, password)
-        self._session.headers.update({'OCS-APIRequest': 'true'})
-        self._session.headers.update({'Accept': 'application/json'})
-        """ Get Token/ID for Room """
-        self.caps = self._session.get(
-            f"{url}/ocs/v1.php/cloud/capabilities").json()
-        self.attachments_folder = self.caps["ocs"]["data"]["capabilities"]["spreed"]["config"]["attachments"]['folder']
-        self.attachments_allowed = self.caps["ocs"]["data"]["capabilities"]["spreed"]["config"]["attachments"][
-            'allowed']
-        self.webdav_root = self.caps["ocs"]["data"]["capabilities"]['core']['webdav-root']
-        prefix = "/ocs/v2.php/apps/spreed/api/"
-        if 'conversation-v4' in self.caps["ocs"]["data"]["capabilities"]["spreed"]["features"]:
-            request_rooms = self._session.get(f"{self.url}{prefix}v4/room")
-        else:
-            request_rooms = self._session.get(f"{self.url}{prefix}v1/room")
-        room_json = request_rooms.json()
-        rooms = room_json["ocs"]["data"]
-        self.room_tokens = {}
-        for roomInfo in rooms:
-            self.room_tokens[roomInfo["name"]] = roomInfo["token"]
 
     def send_message(self, message="", **kwargs):
         """Send a message to NextCloud Talk."""
         targets = kwargs.get("target")
+        self.client.get_rooms()
         if not targets and not (self.room is None):
             targets = {self.room}
         if not targets:
@@ -91,41 +64,20 @@ class NextCloudTalkNotificationService(BaseNotificationService):
             data = kwargs.get("data")
             if data:
                 for attach in data:
-                    file = open(data[attach], 'rb')
-                    resp = self._session.put(f"{self.url}/{self.webdav_root}{self.attachments_folder}/{attach}",
-                                             data=file)
-                    if resp.status_code in (200, 201, 202, 204):
-                        uploaded[attach] = data[attach]
-                    else:
-                        _LOGGER.error("upload attachment error %s, %s, %s", resp.status_code, attach,
-                                      data[attach])
+                    file = open(data[attach], "rb")
+                    ok = self.client.upload_file(attach, file, data)
+                    if not ok:
+                        uploaded[attach] = data
             for target in targets:
                 """ Get Token/ID for target room """
-                if target in self.room_tokens:
-                    roomtoken = self.room_tokens[target]
-                    for uploaded_file in uploaded:
-                        data = {"shareType": 10, "shareWith": roomtoken,
-                                'path': self.attachments_folder + '/' + uploaded_file, 'referenceId': "",
-                                'talkMetaData': {"messageType": "comment"}}
-                        share_url = f"{self.url}/ocs/v2.php/apps/files_sharing/api/v1/shares"
-                        resp = self._session.post(share_url, data=data)
-                        if resp.status_code != 200:
-                            _LOGGER.error("Share file %s error for %s, %s, %s, %s",
-                                          uploaded_file, target, share_url, resp, data)
+                if self.client.exist_room(target):
 
-                    data = {"token": roomtoken, "message": message, "actorType": "",
-                            "actorId": "", "actorDisplayName": "", "timestamp": 0, "messageParameters": []}
-                    prefix = "/ocs/v2.php/apps/spreed/api/v1"
-                    resp = self._session.post(
-                        f"{self.url}{prefix}/chat/{roomtoken}", data=data)
-                    if resp.status_code == 201:
-                        success = resp.json()["ocs"]["meta"]["status"]
-                        if not success:
-                            _LOGGER.error(
-                                "Unable to post NextCloud Talk message")
-                    else:
-                        _LOGGER.error(
-                            "Incorrect status code when posting message: %d", resp.status_code)
+                    self.client.send_message(target, message)
+
+                    if len(uploaded) > 0:
+                        self.client.send_file(target, target, uploaded)
+
                 else:
                     _LOGGER.error(
-                        "Unable to post NextCloud Talk message: no token for: %s", target)
+                        "Unable to post NextCloud Talk message: no token for: "
+                        f"no token for: {target}")
