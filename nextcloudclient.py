@@ -12,8 +12,8 @@ class NextcloudClient:
         self.url = url
         self._session = requests.Session()
         self._session.auth = (username, password)
-        self._session.headers.update({'OCS-APIRequest': 'true'})
-        self._session.headers.update({'Accept': 'application/json'})
+        self._session.headers.update({"OCS-APIRequest": "true"})
+        self._session.headers.update({"Accept": "application/json"})
 
         self.caps = self._session.get(
             f"{url}/ocs/v1.php/cloud/capabilities").json()
@@ -28,7 +28,7 @@ class NextcloudClient:
         self.prefix = "/ocs/v2.php/apps/spreed/api/"
 
     def get_rooms(self):
-        if 'conversation-v4' in self.caps["ocs"]["data"]["capabilities"][
+        if "conversation-v4" in self.caps["ocs"]["data"]["capabilities"][
                 "spreed"]["features"]:
             request_rooms = self._session.get(
                 f"{self.url}{self.prefix}v4/room")
