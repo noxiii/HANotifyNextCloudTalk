@@ -1,0 +1,11 @@
+services:
+  ha:
+    image: homeassistant/home-assistant
+    volumes:
+      - ha:/config
+      - ./:/config/custom_components/nextcloud_talk/
+    ports:
+      - 8123:8123
+
+volumes:
+  ha:
