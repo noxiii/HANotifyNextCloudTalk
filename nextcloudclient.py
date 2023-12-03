@@ -72,7 +72,7 @@ class NextcloudClient:
             else:
                 _LOGGER.error(
                     "Incorrect status code when posting message: "
-                    "{resp.status_code}")
+                    f"{resp.status_code}")
 
     def send_file(self, room, uploaded):
         roomtoken = self.room_tokens[room]
