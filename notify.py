@@ -37,7 +37,7 @@ def get_service(hass, config, discovery_info=None):
 
     except Exception as e:
         _LOGGER.warning(
-            f"Nextcloud authentication failed for user {username}."
+            f"Nextcloud authentication failed for user {username}. "
             f"Except: {e}")
 
     return None
