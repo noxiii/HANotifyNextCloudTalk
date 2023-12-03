@@ -10,7 +10,6 @@ from homeassistant.const import (CONF_PASSWORD, CONF_ROOM, CONF_URL,
 
 from .nextcloudclient import NextcloudClient
 
-
 _LOGGER = logging.getLogger(__name__)
 
 # pylint: disable=no-value-for-parameter

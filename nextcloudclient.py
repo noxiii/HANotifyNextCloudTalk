@@ -1,6 +1,7 @@
 #!/bin/python
 """NextCloud Client"""
 import logging
+
 import requests
 
 _LOGGER = logging.getLogger(__name__)
