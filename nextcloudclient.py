@@ -12,23 +12,23 @@ class NextcloudClient:
         self.url = url
         self._session = requests.Session()
         self._session.auth = (username, password)
-        self._session.headers.update({'OCS-APIRequest': 'true'})
-        self._session.headers.update({'Accept': 'application/json'})
+        self._session.headers.update({"OCS-APIRequest": "true"})
+        self._session.headers.update({"Accept": "application/json"})
 
         self.caps = self._session.get(
             f"{url}/ocs/v1.php/cloud/capabilities").json()
 
         self.attachments_folder = self.caps["ocs"]["data"]["capabilities"][
-            "spreed"]["spreed"]["config"]["attachments"]["folder"]
+            "spreed"]["config"]["attachments"]["folder"]
         self.attachments_allowed = self.caps["ocs"]["data"]["capabilities"][
-            "spreed"]["spreed"]["config"]["attachments"]["allowed"]
+            "spreed"]["config"]["attachments"]["allowed"]
         self.webdav_root = self.caps["ocs"]["data"]["capabilities"][
-            "spreed"]["core"]["webdav-root"]
+            "core"]["webdav-root"]
 
         self.prefix = "/ocs/v2.php/apps/spreed/api/"
 
     def get_rooms(self):
-        if 'conversation-v4' in self.caps["ocs"]["data"]["capabilities"][
+        if "conversation-v4" in self.caps["ocs"]["data"]["capabilities"][
                 "spreed"]["features"]:
             request_rooms = self._session.get(
                 f"{self.url}{self.prefix}v4/room")
@@ -72,7 +72,7 @@ class NextcloudClient:
             else:
                 _LOGGER.error(
                     "Incorrect status code when posting message: "
-                    "{resp.status_code}")
+                    f"{resp.status_code}")
 
     def send_file(self, room, uploaded):
         roomtoken = self.room_tokens[room]

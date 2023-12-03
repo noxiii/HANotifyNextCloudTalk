@@ -37,7 +37,7 @@ def get_service(hass, config, discovery_info=None):
 
     except Exception as e:
         _LOGGER.warning(
-            f"Nextcloud authentication failed for user {username}."
+            f"Nextcloud authentication failed for user {username}. "
             f"Except: {e}")
 
     return None
@@ -64,7 +64,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
             data = kwargs.get("data")
             if data:
                 for attach in data:
-                    file = open(data[attach], 'rb')
+                    file = open(data[attach], "rb")
                     ok = self.client.upload_file(attach, file, data)
                     if not ok:
                         uploaded[attach] = data
