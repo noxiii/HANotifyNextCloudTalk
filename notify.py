@@ -36,9 +36,10 @@ def get_service(hass, config, discovery_info=None):
     try:
         return NextCloudTalkNotificationService(url, username, password, room)
 
-    except:
+    except Exception as e:
         _LOGGER.warning(
-            f"Nextcloud authentication failed for user {username}")
+            f"Nextcloud authentication failed for user {username}."
+            f"Except: {e}")
 
     return None
 
@@ -65,12 +66,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
             if data:
                 for attach in data:
                     file = open(data[attach], 'rb')
-                    self.client.upload_file(attach, file, data)
-                    ok = self.client.upload_file(
-                                                                attach,
-                                                                file,
-                                                                data
-                                                               )
+                    ok = self.client.upload_file(attach, file, data)
                     if not ok:
                         uploaded[attach] = data
             for target in targets:
@@ -84,4 +80,5 @@ class NextCloudTalkNotificationService(BaseNotificationService):
 
                 else:
                     _LOGGER.error(
-                        "Unable to post NextCloud Talk message: no token for: %s", target)
+                        "Unable to post NextCloud Talk message: no token for: "
+                        f"no token for: {target}")
