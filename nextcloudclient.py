@@ -18,23 +18,23 @@ class NextcloudClient:
         self.caps = self._session.get(
             f"{url}/ocs/v1.php/cloud/capabilities").json()
 
-        capabilities = self.caps["ocs"]["data"]["capabilities"]["spreed"]
-        self.attachments_folder = capabilities["spreed"]["config"][
-                                               "attachments"]["folder"]
-        self.attachments_allowed = capabilities["spreed"]["config"][
-                                                "attachments"]["allowed"]
-        self.webdav_root = capabilities['core']['webdav-root']
+        self.attachments_folder = self.caps["ocs"]["data"]["capabilities"][
+            "spreed"]["spreed"]["config"]["attachments"]["folder"]
+        self.attachments_allowed = self.caps["ocs"]["data"]["capabilities"][
+            "spreed"]["spreed"]["config"]["attachments"]["allowed"]
+        self.webdav_root = self.caps["ocs"]["data"]["capabilities"][
+            "spreed"]["core"]["webdav-root"]
 
         self.prefix = "/ocs/v2.php/apps/spreed/api/"
 
     def get_rooms(self):
         if 'conversation-v4' in self.caps["ocs"]["data"]["capabilities"][
-                                          "spreed"]["features"]:
+                "spreed"]["features"]:
             request_rooms = self._session.get(
-                                            f"{self.url}{self.prefix}v4/room")
+                f"{self.url}{self.prefix}v4/room")
         else:
             request_rooms = self._session.get(
-                                            f"{self.url}{self.prefix}v1/room")
+                f"{self.url}{self.prefix}v1/room")
 
         room_json = request_rooms.json()
         rooms = room_json["ocs"]["data"]
@@ -51,14 +51,14 @@ class NextcloudClient:
     def send_message(self, room, message):
         roomtoken = self.room_tokens[room]
         data = {
-                    "token": roomtoken,
-                    "message": message,
-                    "actorType": "",
-                    "actorId": "",
-                    "actorDisplayName": "",
-                    "timestamp": 0,
-                    "messageParameters": []
-                }
+            "token": roomtoken,
+            "message": message,
+            "actorType": "",
+            "actorId": "",
+            "actorDisplayName": "",
+            "timestamp": 0,
+            "messageParameters": []
+        }
         resp = self._session.post(
             f"{self.url}{self.prefix}/v1/chat/{roomtoken}", data=data)
 
@@ -68,7 +68,7 @@ class NextcloudClient:
 
             if not success:
                 _LOGGER.error(
-                        "Unable to post NextCloud Talk message")
+                    "Unable to post NextCloud Talk message")
             else:
                 _LOGGER.error(
                     "Incorrect status code when posting message: "
@@ -84,17 +84,16 @@ class NextcloudClient:
             share_url = f"{self.url}{self.prefix}/v1/shares"
             resp = self._session.post(share_url, data=data)
             if resp.status_code != 200:
-                _LOGGER.error("Share file %s error for %s, %s, %s, %s",
-                              uploaded_file, room, share_url, resp, data)
+                _LOGGER.error(
+                    f"Share file {uploaded_file} error for {room}, "
+                    f"{share_url}, {resp}, {data}")
 
     def upload_file(self, attach, file, data):
         resp = self._session.put(
-                                f"{self.url}/{self.webdav_root}"
-                                f"{self.attachments_folder}/{attach}",
-                                data=file)
+            f"{self.url}/{self.webdav_root}{self.attachments_folder}/{attach}",
+            data=file)
         if resp.status_code in (200, 201, 202, 204):
             return True
         else:
-            _LOGGER.error(f"upload attachment error {resp.status_code}, "
-                          "{attach}, {data[attach]}")
+            _LOGGER.error(f"upload attachment error {resp.status_code}, {attach}, {data[attach]}")
         return False
