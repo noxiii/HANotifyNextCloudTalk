@@ -64,7 +64,7 @@ class NextCloudTalkNotificationService(BaseNotificationService):
             data = kwargs.get("data")
             if data:
                 for attach in data:
-                    file = open(data[attach], 'rb')
+                    file = open(data[attach], "rb")
                     ok = self.client.upload_file(attach, file, data)
                     if not ok:
                         uploaded[attach] = data
