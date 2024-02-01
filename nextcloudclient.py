@@ -69,10 +69,10 @@ class NextcloudClient:
             if not success:
                 _LOGGER.error(
                     "Unable to post NextCloud Talk message")
-            else:
-                _LOGGER.error(
-                    "Incorrect status code when posting message: "
-                    f"{resp.status_code}")
+        else:
+            _LOGGER.error(
+                "Incorrect status code when posting message: "
+                f"{resp.status_code}")
 
     def send_file(self, room, uploaded):
         roomtoken = self.room_tokens[room]
