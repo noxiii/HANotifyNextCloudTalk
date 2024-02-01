@@ -88,12 +88,12 @@ class NextcloudClient:
                     f"Share file {uploaded_file} error for {room}, "
                     f"{share_url}, {resp}, {data}")
 
-    def upload_file(self, attach, file, data):
-        resp = self._session.put(
-            f"{self.url}/{self.webdav_root}{self.attachments_folder}/{attach}",
-            data=file)
+    def upload_file(self, path, filedata):
+        url = f"{self.url}/{self.webdav_root}{self.attachments_folder}/{path}"
+        _LOGGER.warning(f"Except: {url}")
+        resp = self._session.put(url, data=filedata)
+        _LOGGER.warning(f"Except: {resp}")
         if resp.status_code in (200, 201, 202, 204):
             return True
-        else:
-            _LOGGER.error(f"upload attachment error {resp.status_code}, {attach}, {data[attach]}")
+        _LOGGER.error(f"upload attachment error {resp.status_code}, {path}")
         return False
