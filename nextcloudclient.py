@@ -59,8 +59,8 @@ class NextcloudClient:
             "timestamp": 0,
             "messageParameters": []
         }
-        resp = self._session.post(
-            f"{self.url}{self.prefix}/v1/chat/{roomtoken}", data=data)
+        url = f"{self.url}{self.prefix}/v1/chat/{roomtoken}"
+        resp = self._session.post(url, data=data)
 
         # not correct
         if resp.status_code == 201:
