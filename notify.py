@@ -60,22 +60,23 @@ class NextCloudTalkNotificationService(BaseNotificationService):
         if not targets:
             _LOGGER.error("NextCloud Talk message no targets")
         else:
-            uploaded = {}
+            uploaded = []
             data = kwargs.get("data")
             if data:
-                for attach in data:
-                    file = open(data[attach], "rb")
-                    ok = self.client.upload_file(attach, file, data)
+                for path, asset in data.items():
+                    filedata = open(asset, "rb")
+                    ok = self.client.upload_file(path, filedata)
                     if not ok:
-                        uploaded[attach] = data
+                        _LOGGER.error(f"upload file {path} failed")
+                    uploaded.append(path)
             for target in targets:
                 """ Get Token/ID for target room """
                 if self.client.exist_room(target):
 
                     self.client.send_message(target, message)
 
-                    if len(uploaded) > 0:
-                        self.client.send_file(target, target, uploaded)
+                    for path in uploaded:
+                        self.client.send_file(target, path)
 
                 else:
                     _LOGGER.error(
