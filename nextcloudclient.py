@@ -59,8 +59,8 @@ class NextcloudClient:
             "timestamp": 0,
             "messageParameters": []
         }
-        resp = self._session.post(
-            f"{self.url}{self.prefix}/v1/chat/{roomtoken}", data=data)
+        url = f"{self.url}{self.prefix}/v1/chat/{roomtoken}"
+        resp = self._session.post(url, data=data)
 
         # not correct
         if resp.status_code == 201:
@@ -69,31 +69,39 @@ class NextcloudClient:
             if not success:
                 _LOGGER.error(
                     "Unable to post NextCloud Talk message")
-            else:
-                _LOGGER.error(
-                    "Incorrect status code when posting message: "
-                    f"{resp.status_code}")
+        else:
+            _LOGGER.error(
+                "Incorrect status code when posting message: "
+                f"{resp.status_code}")
 
-    def send_file(self, room, uploaded):
+    def send_file(self, room, path):
         roomtoken = self.room_tokens[room]
-        for uploaded_file in uploaded:
-            data = {"shareType": 10, "shareWith": roomtoken,
-                    "path": f"{self.attachments_folder}/{uploaded_file}",
-                    "referenceId": "",
-                    "talkMetaData": {"messageType": "comment"}}
-            share_url = f"{self.url}{self.prefix}/v1/shares"
-            resp = self._session.post(share_url, data=data)
-            if resp.status_code != 200:
-                _LOGGER.error(
-                    f"Share file {uploaded_file} error for {room}, "
-                    f"{share_url}, {resp}, {data}")
+        filepath = f"{self.attachments_folder}/{path}"
+        data = {
+            "shareType": 10,
+            "shareWith": roomtoken,
+            "path": filepath,
+            "referenceId": "",
+            "talkMetaData": {
+                "messageType": "comment"
+            }
+        }
 
-    def upload_file(self, attach, file, data):
-        resp = self._session.put(
-            f"{self.url}/{self.webdav_root}{self.attachments_folder}/{attach}",
-            data=file)
+        url = f"{self.url}/ocs/v2.php/apps/files_sharing/api/v1/shares"
+        resp = self._session.post(url, data=data)
+
+        if resp.status_code != 200:
+            _LOGGER.error(
+                f"Share file {path} error for {room}, "
+                f"{url}, {resp}, {data}")
+
+    def upload_file(self, path, filedata):
+        url = f"{self.url}/{self.webdav_root}{self.attachments_folder}/{path}"
+        _LOGGER.warning(f"Except: {url}")
+        resp = self._session.put(url, data=filedata)
+        _LOGGER.warning(f"Except: {resp}")
+
         if resp.status_code in (200, 201, 202, 204):
             return True
-        else:
-            _LOGGER.error(f"upload attachment error {resp.status_code}, {attach}, {data[attach]}")
+        _LOGGER.error(f"upload attachment error {resp.status_code}, {path}")
         return False
